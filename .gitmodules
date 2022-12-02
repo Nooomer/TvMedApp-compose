@@ -1,2 +1,3 @@
+[submodule ".github"]
 path = .github
 url = https://github.com/Nooomer/Actions-for-build-and-realese-apk
