@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TvMedApp_compose</string>
+    <string name="title_activity_treatment">Обращения</string>
+    <string name="title_activity_help">Справка</string>
+    <string name="phone_number_text">Номер телефона</string>
+    <string name="password_text">Пароль</string>
+    <string name="login_button_text">Войти</string>
+</resources>
