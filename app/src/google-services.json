@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "463331926382",
+    "project_id": "tvmedapp-compose",
+    "storage_bucket": "tvmedapp-compose.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463331926382:android:29695f1ca849cdeb51a17f",
+        "android_client_info": {
+          "package_name": "com.example.tvmedapp_compose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "463331926382-vi2opu0bm7fonounhgn3319lr9p7a5u6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC997Ih0KTOI2hhsR0kctga_h7HbO4lFTU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "463331926382-vi2opu0bm7fonounhgn3319lr9p7a5u6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
