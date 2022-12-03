@@ -13,6 +13,16 @@
         android:theme="@style/Theme.TvMedApp_compose"
         tools:targetApi="31">
         <activity
+            android:name=".HelpActivity"
+            android:exported="false"
+            android:label="@string/title_activity_help"
+            android:theme="@style/Theme.TvMedApp_compose" />
+        <activity
+            android:name=".TreatmentActivity"
+            android:exported="false"
+            android:label="@string/title_activity_treatment"
+            android:theme="@style/Theme.TvMedApp_compose" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
