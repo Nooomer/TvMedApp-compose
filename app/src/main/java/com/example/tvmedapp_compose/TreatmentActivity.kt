@@ -25,12 +25,9 @@ import androidx.compose.ui.unit.*
 import com.example.tvmedapp_compose.interfaces.*
 import com.example.tvmedapp_compose.models.*
 import com.example.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
-import kotlinx.coroutines.*
 
-private fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
 private var result: List<TreatmentModel?>? = null
 private var result2: List<UserModel?>? = null
-private val scope = CoroutineScope(Dispatchers.Main + Job())
 private var viewSize: Int = 0
 var data = mutableListOf<MutableList<String?>>()
 class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
