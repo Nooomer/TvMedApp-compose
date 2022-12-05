@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.tvmedapp_compose'
+    namespace 'ru.nooomer.tvmedapp_compose'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.tvmedapp_compose"
+        applicationId 'ru.nooomer.tvmedapp_compose'
         minSdk 24
         targetSdk 33
         versionCode 1
