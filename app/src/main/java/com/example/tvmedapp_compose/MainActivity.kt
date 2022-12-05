@@ -1,5 +1,6 @@
 package com.example.tvmedapp_compose
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Surface
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -75,17 +77,18 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                         }
                     }
                     Greeting(mContext)
+                }
             }
         }
     }
-    fun login_click(login_text: String, password_text: String){
+    fun login_click(login_text: String, password_text: String, context: Context){
         if(!ssm.validation() and (login_text!="")) {
             scope.launch {
                 val def = scope.asyncIO { result = auth(login_text, password_text) }
                 def.await()
                 if ((result?.token == null) or (result == null)) {
                     val toast = Toast.makeText(
-                        mContext,
+                        context,
                         "Сломано",
                         Toast.LENGTH_SHORT
                     )
@@ -96,7 +99,7 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                     ssm.save(USER_TYPE, result?.user_type)
                     ssm.save(USER_ID, result?.user_id)
                     val toast = Toast.makeText(
-                        mContext,
+                        context,
                         "Токен сохранен",
                         Toast.LENGTH_SHORT
                     )
