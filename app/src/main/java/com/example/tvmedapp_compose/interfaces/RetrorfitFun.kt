@@ -7,7 +7,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 interface RetrorfitFun {
-    fun get(funType: String?, table: String?, token: String?, vararg params: String): List<*>? {
+   suspend fun get(funType: String?, table: String?, token: String?, vararg params: String): List<*>? {
         val mService = Common.retrofitService
         var result: List<UserModel?>?
         var result2: List<TreatmentModel?>?
