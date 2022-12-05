@@ -104,8 +104,9 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                         Toast.LENGTH_SHORT
                     )
                     toast.show()
-                    mContext.startActivity(Intent(mContext, TreatmentActivity::class.java))
-                    finish()
+                    val activity = (context as? Activity)
+                    context.startActivity(Intent(context, TreatmentActivity::class.java))
+                    activity?.finish()
                     println(result?.token)
                 }
             }
