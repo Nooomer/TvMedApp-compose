@@ -58,17 +58,22 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
         super.onCreate(savedInstanceState)
         setContent {
             TvMedApp_composeTheme {
-                mContext = LocalContext.current
-                // A surface container using the 'background' color from the theme
-                ssm = SessionManager(this)
-                if(ssm.validation()) {
-                    if ((ssm.fetch(TOKEN_LIFETIME)?.toLong()!! < (ssm.fetch(TOKEN_LIFETIME)?.toLong()
-                            ?.plus(60000000000)!!))
-                    ) {
-                        mContext.startActivity(Intent(mContext, TreatmentActivity::class.java))
-                        finish()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    mContext = LocalContext.current
+                    // A surface container using the 'background' color from the theme
+                    ssm = SessionManager(this)
+                    if (ssm.validation()) {
+                        if ((ssm.fetch(TOKEN_LIFETIME)?.toLong()!! < (ssm.fetch(TOKEN_LIFETIME)
+                                ?.toLong()
+                                ?.plus(60000000000)!!))
+                        ) {
+                            mContext.startActivity(Intent(mContext, TreatmentActivity::class.java))
+                            (mContext as Activity).finish()
+                        }
                     }
-                }
                     Greeting(mContext)
             }
         }
