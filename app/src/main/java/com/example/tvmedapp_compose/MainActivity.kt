@@ -189,7 +189,7 @@ fun Greeting(context: Context) {
             Button(
                 modifier = Modifier.width(300.dp).padding(all = 10.dp)
                     .align(Alignment.CenterHorizontally),onClick = {
-                        MainActivity().login_click(phone.value,password.value)
+                        MainActivity().login_click(phone.value,password.value, context)
                 }){
                 Text(stringResource(R.string.login_button_text))
             }
