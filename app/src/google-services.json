@@ -1,33 +1,71 @@
 {
   "project_info": {
-    "project_number": "463331926382",
-    "project_id": "tvmedapp-compose",
-    "storage_bucket": "tvmedapp-compose.appspot.com"
+    "project_number": "83192225421",
+    "firebase_url": "https://tvmedicines-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "tvmedicines",
+    "storage_bucket": "tvmedicines.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:463331926382:android:29695f1ca849cdeb51a17f",
+        "mobilesdk_app_id": "1:83192225421:android:d172b69bed799dc39a0cc4",
         "android_client_info": {
-          "package_name": "com.example.tvmedapp_compose"
+          "package_name": "nooomer.tvmedapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "463331926382-vi2opu0bm7fonounhgn3319lr9p7a5u6.apps.googleusercontent.com",
+          "client_id": "83192225421-3vdqlrks0sj14td43ho1a51mq9sv8gra.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "nooomer.tvmedapp",
+            "certificate_hash": "b0ecc8210f2f666b05f5558f863bb64aa8a7d3f2"
+          }
+        },
+        {
+          "client_id": "83192225421-qhur5cfvgspmaon453ku5pqtra3huaj3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC997Ih0KTOI2hhsR0kctga_h7HbO4lFTU"
+          "current_key": "AIzaSyC1cT9ddQYjpkeJXJ29gTBU8j1gN4Uw2Dg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "463331926382-vi2opu0bm7fonounhgn3319lr9p7a5u6.apps.googleusercontent.com",
+              "client_id": "83192225421-qhur5cfvgspmaon453ku5pqtra3huaj3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83192225421:android:ccdcc145f819e34e9a0cc4",
+        "android_client_info": {
+          "package_name": "ru.nooomer.tvmedapp_compose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "83192225421-qhur5cfvgspmaon453ku5pqtra3huaj3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1cT9ddQYjpkeJXJ29gTBU8j1gN4Uw2Dg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "83192225421-qhur5cfvgspmaon453ku5pqtra3huaj3.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
