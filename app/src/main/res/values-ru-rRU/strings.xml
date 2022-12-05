@@ -6,4 +6,6 @@
     <string name="phone_number_text">Номер телефона</string>
     <string name="password_text">Пароль</string>
     <string name="login_button_text">Войти</string>
+    <string name="doctor">"Врач: "</string>
+    <string name="patient">"Пациент: "</string>
 </resources>
