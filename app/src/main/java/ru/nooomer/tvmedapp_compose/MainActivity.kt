@@ -18,8 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -37,15 +41,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.nooomer.tvmedapp_compose.RetrifitService.SessionManager
-import ru.nooomer.tvmedapp_compose.interfaces.*
-import ru.nooomer.tvmedapp_compose.models.*
-import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import ru.nooomer.tvmedapp_compose.RetrifitService.SessionManager
+import ru.nooomer.tvmedapp_compose.interfaces.*
+import ru.nooomer.tvmedapp_compose.models.*
+import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 
 private fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
 lateinit var ssm:SessionManager
@@ -112,11 +116,17 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
         }
     }
 }
+fun checkValidPhone(s: String): Boolean{
+    return !Regex(pattern = "89\\d{9}\$").containsMatchIn(input = s)
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Greeting(context: Context) {
     val phone = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    var button_enable = remember { mutableStateOf(false) }
+    var phone_error = remember { mutableStateOf(false) }
+    var label_color = remember { mutableStateOf(Color.Black) }
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -124,12 +134,22 @@ fun Greeting(context: Context) {
         {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(5.dp)
             )
             {
                 TextField(
                     phone.value,
-                    { phone.value = it },
+                    { phone.value = it
+                        button_enable.value = (password.value!="") and (phone.value!="")
+                        if(checkValidPhone(it)) {
+                            phone_error.value = true
+                            label_color.value = Color.Red
+                        }
+                        else{
+                            phone_error.value = false
+                            label_color.value = Color.Black
+                        }
+                        },
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
@@ -138,30 +158,43 @@ fun Greeting(context: Context) {
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        errorLabelColor = Color.Red,
+                        errorCursorColor = Color.Red,
                     ),
                     label = {
                         Text(
                             stringResource(R.string.phone_number_text),
-                            color = Color.Black
+                            color = label_color.value
                         )
+                    },
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.Phone, contentDescription = null, tint = Color.Black)
                     },
                     singleLine = true,
                     shape = MaterialTheme.shapes.small.copy(
                         bottomEnd = CornerSize(10.dp),
                         bottomStart = CornerSize(10.dp)
                     ),
-                    modifier = Modifier.height(70.dp)
+                    modifier = Modifier.height(70.dp),
+                    isError = phone_error.value
                 )
 
             }
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxWidth().padding(all = 10.dp)
+                modifier = Modifier.fillMaxWidth().padding(5.dp)
             )
             {
                 TextField(
                     password.value,
-                    { password.value = it },
+                    {
+                        password.value = it
+                        button_enable.value = (password.value!="") and (phone.value!="")
+                    },
+                    visualTransformation = {
+                        PasswordVisualTransformation().filter(it)
+                    },
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
@@ -181,14 +214,18 @@ fun Greeting(context: Context) {
                         bottomEnd = CornerSize(10.dp),
                         bottomStart = CornerSize(10.dp)
                     ),
-                    modifier = Modifier.height(70.dp)
+                    modifier = Modifier.height(70.dp),
+                    trailingIcon = {
+                        Icon(imageVector = Icons.Outlined.Lock, contentDescription = null, tint = Color.Black)
+                    },
                 )
 
             }
             Button(
+                enabled = button_enable.value and !phone_error.value,
                 modifier = Modifier.width(300.dp).padding(all = 10.dp)
                     .align(Alignment.CenterHorizontally),onClick = {
-                        MainActivity().login_click(phone.value,password.value, context)
+                    MainActivity().login_click(phone.value,password.value, context)
                 }){
                 Text(stringResource(R.string.login_button_text))
             }

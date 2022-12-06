@@ -10,6 +10,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -150,7 +151,6 @@ fun Greeting2(context: Context) {
                         .background(Color.Gray),
                     textAlign = TextAlign.Center
                 )
-                LinearProgressIndicator()
             }
             itemsIndexed(items = list2!!) { pos, _ ->
                 ListItem(list2!![pos]?.doctorSurname, list2!![pos]?.patientSurename, list2!![pos]?.startdate)
