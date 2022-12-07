@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
@@ -127,6 +129,7 @@ fun Greeting(context: Context) {
     var button_enable = remember { mutableStateOf(false) }
     var phone_error = remember { mutableStateOf(false) }
     var label_color = remember { mutableStateOf(Color.Black) }
+    val isLoading = remember { mutableStateOf(false )}
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -226,8 +229,17 @@ fun Greeting(context: Context) {
                 modifier = Modifier.width(300.dp).padding(all = 10.dp)
                     .align(Alignment.CenterHorizontally),onClick = {
                     MainActivity().login_click(phone.value,password.value, context)
+                    isLoading.value = true
                 }){
                 Text(stringResource(R.string.login_button_text))
+                if(isLoading.value){
+                    CircularProgressIndicator(
+                        Modifier
+                            .size(15.dp)
+                            .padding(start = 3.dp, top = 1.dp),
+                    strokeWidth = 1.dp
+                    )
+                }
             }
         }
 }
