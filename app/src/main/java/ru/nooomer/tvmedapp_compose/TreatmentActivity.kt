@@ -49,88 +49,11 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
             }
         }
     }
-
-    override fun onRestart() {
-        super.onRestart()
-    }
-
-    /*fun load(){
-        when (ssm.fetch(USER_TYPE)) {
-            "doctor" ->
-            {
-                scope.launch {
-                    val def = scope.asyncIO {
-                        result =
-                            get(
-                                "all",
-                                "treatment","Bearer "+ssm.fetch(USER_TOKEN)
-                            ) as List<TreatmentModel?>?
-                    }
-                    def.await()
-                    try {
-                        viewSize = result!!.size
-                        for (i in 0 until viewSize) {
-                            data.add(
-                                mutableListOf<String?>(
-                                    result!![i]?.patientSurename,
-                                    result!![i]?.doctorSurname,
-                                    result!![i]?.startdate
-                                )
-                            )
-
-                        }
-                    }
-                    catch (e: NullPointerException){
-                        val toast = Toast.makeText(
-                            applicationContext,
-                            "Данные не загружены",
-                            Toast.LENGTH_SHORT
-                        )
-                        toast.show()
-                    }
-                }
-            }
-            "patient"->{
-                scope.launch {
-                    val def = scope.asyncIO {
-                        result =
-                            get(
-                                "filtered",
-                                "treatment", "Bearer " + ssm.fetch(USER_TOKEN), ssm.fetch(USER_ID)!!
-                            ) as List<TreatmentModel?>?
-                    }
-                    def.await()
-                }
-                    try {
-                        viewSize = result!!.size
-                    }
-                    catch (e: NullPointerException){
-                        val toast = Toast.makeText(
-                            applicationContext,
-                            "Данные не загружены",
-                            Toast.LENGTH_SHORT
-                        )
-                        toast.show()
-                    }
-                    for (i in 0 until viewSize) {
-                        data.add(
-                            mutableListOf<String?>(
-                                result!![i]?.patientSurename,
-                                result!![i]?.doctorSurname,
-                                result!![i]?.startdate
-                            )
-                        )
-                    }
-            }
-        }
-    }
-}
-*/
-@OptIn(ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Greeting2(context: Context) {
         var list2 by remember { mutableStateOf<List<TreatmentModel?>?>(listOf(TreatmentModel("Загрузка...","Загрузка...","Загрузка...")))}
+        val isLoading = remember { mutableStateOf(true) }
         LaunchedEffect(Unit) {
             treatmentFlow.collect {
                 list2 = it
@@ -150,9 +73,15 @@ fun Greeting2(context: Context) {
                         .background(Color.Gray),
                     textAlign = TextAlign.Center
                 )
+                if(isLoading.value){
+                    LinearProgressIndicator()
+                }
             }
             itemsIndexed(items = list2!!) { pos, _ ->
-                ListItem(list2!![pos]?.doctorSurname, list2!![pos]?.patientSurename, list2!![pos]?.startdate)
+                ListItem(list2!![pos]?.doctorSurname, list2!![pos]?.patientSurename, list2!![pos]?.startdate, Modifier.animateItemPlacement())
+                if((pos == list2!!.lastIndex) and(list2!!.lastIndex != 0)){
+                    isLoading.value = false
+                }
             }
         }
     Column(
