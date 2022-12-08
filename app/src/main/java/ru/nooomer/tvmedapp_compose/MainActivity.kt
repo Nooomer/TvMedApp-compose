@@ -7,6 +7,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
@@ -35,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -129,7 +134,9 @@ fun Greeting(context: Context) {
     var button_enable = remember { mutableStateOf(false) }
     var phone_error = remember { mutableStateOf(false) }
     var label_color = remember { mutableStateOf(Color.Black) }
+    var first_loading = remember { mutableStateOf(true) }
     val isLoading = remember { mutableStateOf(false )}
+    val value_counter = remember { mutableStateOf(0 )}
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -165,7 +172,18 @@ fun Greeting(context: Context) {
                         )
                     },
                     trailingIcon = {
-                        Icon(imageVector = Icons.Outlined.Phone, contentDescription = null, tint = Color.Black)
+                        Crossfade(targetState = if (phone_error.value) 1f else 0f, animationSpec = spring(
+                            dampingRatio = 2f,
+                            stiffness = Spring.StiffnessMedium
+                        )) { phone_error ->
+                            // note that it's required to use the value passed by Crossfade
+                            // instead of your state value
+                            if (phone_error == 1f) {
+                                Icon(imageVector = Icons.Outlined.Close, contentDescription = null, tint = Color.Red)
+                            } else {
+                                Icon(imageVector = Icons.Outlined.Phone, contentDescription = null, tint = Color.Black)
+                            }
+                        }
                     },
                     singleLine = true,
                     shape = MaterialTheme.shapes.small.copy(
