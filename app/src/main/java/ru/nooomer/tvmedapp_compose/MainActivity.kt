@@ -261,15 +261,21 @@ fun Greeting(context: Context) {
                     MainActivity().login_click(phone.value,password.value, context)
                     isLoading.value = true
                 }){
-                Text(stringResource(R.string.login_button_text))
-                if(isLoading.value){
-                    CircularProgressIndicator(
-                        Modifier
-                            .size(15.dp)
-                            .padding(start = 3.dp, top = 1.dp),
-                    strokeWidth = 1.dp
-                    )
-                }
+                    Crossfade(targetState = if (isLoading.value) 1f else 0f, animationSpec = spring(
+                        dampingRatio = 2f,
+                        stiffness = Spring.StiffnessHigh
+                    )) { isLoading ->
+                        if (isLoading == 1f) {
+                            CircularProgressIndicator(
+                                Modifier
+                                    .size(15.dp)
+                                    .align(Alignment.CenterVertically),
+                                strokeWidth = 1.dp
+                            )
+                        } else {
+                            Text(stringResource(R.string.login_button_text))
+                        }
+                    }
             }
         }
 }
