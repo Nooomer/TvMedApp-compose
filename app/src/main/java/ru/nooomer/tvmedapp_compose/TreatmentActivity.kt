@@ -6,6 +6,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -52,7 +55,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Greeting2(context: Context) {
-        var list2 by remember { mutableStateOf<List<TreatmentModel?>?>(listOf(TreatmentModel("Загрузка...","Загрузка...","Загрузка...")))}
+        var list2 by remember { mutableStateOf<List<TreatmentModel?>?>((listOf(TreatmentModel("Загрузка...","Загрузка...","Загрузка..."))))}
         val isLoading = remember { mutableStateOf(true) }
         LaunchedEffect(Unit) {
             treatmentFlow.collect {
@@ -73,14 +76,41 @@ fun Greeting2(context: Context) {
                         .background(Color.Gray),
                     textAlign = TextAlign.Center
                 )
-                if(isLoading.value){
-                    LinearProgressIndicator()
+                if(isLoading.value) {
+
                 }
+                    Crossfade(targetState = if (isLoading.value) 0f else 1f, animationSpec = spring(
+                        dampingRatio = 2f,
+                        stiffness = Spring.StiffnessMedium
+                    )) { loader ->
+                        // note that it's required to use the value passed by Crossfade
+                        // instead of your state value
+                        if (loader == 1f) {
+                            //isLoading.value = false
+                        }
+                        else{
+                            LinearProgressIndicator(Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+            if(list2 == null){
+
             }
-            itemsIndexed(items = list2!!) { pos, _ ->
-                ListItem(list2!![pos]?.doctorSurname, list2!![pos]?.patientSurename, list2!![pos]?.startdate, Modifier.animateItemPlacement())
-                if((pos == list2!!.lastIndex) and(list2!!.lastIndex != 0)){
-                    isLoading.value = false
+            else {
+                itemsIndexed(items = list2!!) { pos, _ ->
+                    ListItem(
+                        list2!![pos]?.doctorSurname,
+                        list2!![pos]?.patientSurename,
+                        list2!![pos]?.startdate,
+                        Modifier.animateItemPlacement(animationSpec = spring(
+                            dampingRatio = 2f,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                        )
+                    )
+                    if ((pos == list2!!.lastIndex) and (list2!!.lastIndex != 0)) {
+                        isLoading.value = false
+                    }
                 }
             }
         }
@@ -102,26 +132,24 @@ fun Greeting2(context: Context) {
     }
 }
 @Composable
+@ExperimentalFoundationApi
 fun ListItem(doctorSurename: String?, patientSurename: String?, dateOfStart: String?, modifier: Modifier = Modifier) {
     Surface(
         elevation = 8.dp,
         shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .height(80.dp)
-            .padding(start = 10.dp, end = 10.dp)
+        modifier = modifier.height(80.dp).padding(start = 10.dp, end = 10.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = modifier.fillMaxHeight(),
                 horizontalAlignment = Alignment.Start
             ) {
                 if (doctorSurename != null) {
                     Text(
-                        modifier = Modifier
+                        modifier = modifier
                             .padding(start = 6.dp),
                         text = doctorSurename,
                         fontSize = 24.sp
@@ -129,7 +157,7 @@ fun ListItem(doctorSurename: String?, patientSurename: String?, dateOfStart: Str
                 }
                 if (patientSurename != null) {
                     Text(
-                        modifier = Modifier
+                        modifier = modifier
                             .padding(start = 6.dp),
                         text = patientSurename,
                         fontSize = 24.sp
@@ -137,12 +165,12 @@ fun ListItem(doctorSurename: String?, patientSurename: String?, dateOfStart: Str
                 }
             }
             Column(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = modifier.fillMaxHeight(),
                 horizontalAlignment = Alignment.End
             ) {
                 if (dateOfStart != null) {
                     Text(
-                        modifier = Modifier
+                        modifier = modifier
                             .padding(end = 6.dp),
                         text = dateOfStart,
                         fontSize = 24.sp
