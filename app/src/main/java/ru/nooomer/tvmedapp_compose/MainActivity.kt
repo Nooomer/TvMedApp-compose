@@ -144,14 +144,7 @@ fun Greeting(context: Context) {
                     phone.value,
                     { phone.value = it
                         button_enable.value = (password.value!="") and (phone.value!="")
-                        if(checkValidPhone(it)) {
-                            phone_error.value = true
-                            label_color.value = Color.Red
-                        }
-                        else{
-                            phone_error.value = false
-                            label_color.value = Color.Black
-                        }
+                        value_counter.value = it.length
                         },
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -179,7 +172,26 @@ fun Greeting(context: Context) {
                         bottomEnd = CornerSize(10.dp),
                         bottomStart = CornerSize(10.dp)
                     ),
-                    modifier = Modifier.height(70.dp),
+                    modifier = Modifier.height(70.dp)
+                        .onFocusEvent {focusState ->
+                            when{
+                                (!focusState.isFocused and !first_loading.value) and (value_counter.value>0) ->{
+                                    if(checkValidPhone(phone.value)) {
+                                        phone_error.value = true
+                                        label_color.value = Color.Red
+                                    }
+                                    else{
+                                        phone_error.value = false
+                                        label_color.value = Color.Black
+                                    }
+                                }
+                                else ->{
+                                    first_loading.value = false
+                                    phone_error.value = false
+                                    label_color.value = Color.Black
+                                }
+                            }
+                                        },
                     isError = phone_error.value
                 )
 
