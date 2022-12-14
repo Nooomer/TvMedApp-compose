@@ -63,6 +63,7 @@ lateinit var ssm:SessionManager
 private val scope = CoroutineScope(Dispatchers.Main + Job())
 private var result: AuthModel? = null
 private var result2: List<UserModel?>? = null
+private var isFailed: Boolean = false
 class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
     private lateinit var mContext: Context
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,6 +104,7 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                         Toast.LENGTH_SHORT
                     )
                     toast.show()
+                  isFailed = true
                 } else {
                     ssm.save(USER_TOKEN, result?.token)
                     ssm.save(TOKEN_LIFETIME, System.currentTimeMillis().toString())
@@ -118,6 +120,7 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                     context.startActivity(Intent(context, TreatmentActivity::class.java))
                     activity?.finish()
                     println(result?.token)
+                    isFailed = false
                 }
             }
         }
@@ -186,6 +189,7 @@ fun Greeting(context: Context) {
                         }
                     },
                     singleLine = true,
+                    enabled = !isLoading.value,
                     shape = MaterialTheme.shapes.small.copy(
                         bottomEnd = CornerSize(10.dp),
                         bottomStart = CornerSize(10.dp)
@@ -196,10 +200,12 @@ fun Greeting(context: Context) {
                                 (!focusState.isFocused and !first_loading.value) and (value_counter.value>0) ->{
                                     if(checkValidPhone(phone.value)) {
                                         phone_error.value = true
+                                        button_enable.value = false
                                         label_color.value = Color.Red
                                     }
                                     else{
                                         phone_error.value = false
+                                        button_enable.value = true
                                         label_color.value = Color.Black
                                     }
                                 }
@@ -238,6 +244,7 @@ fun Greeting(context: Context) {
                         unfocusedIndicatorColor = Color.Transparent,
                     ),
                     singleLine = true,
+                    enabled = !isLoading.value,
                     label = {
                         Text(
                             stringResource(R.string.password_text),
@@ -260,22 +267,37 @@ fun Greeting(context: Context) {
                     .align(Alignment.CenterHorizontally),onClick = {
                     MainActivity().login_click(phone.value,password.value, context)
                     isLoading.value = true
-                }){
-                    Crossfade(targetState = if (isLoading.value) 1f else 0f, animationSpec = spring(
-                        dampingRatio = 2f,
-                        stiffness = Spring.StiffnessHigh
-                    )) { isLoading ->
-                        if (isLoading == 1f) {
+                }){ if (isLoading.value) {
                             CircularProgressIndicator(
                                 Modifier
                                     .size(15.dp)
                                     .align(Alignment.CenterVertically),
                                 strokeWidth = 1.dp
                             )
+                            Text(stringResource(R.string.login_button_text))
+                            isLoading.value = isFailed
                         } else {
+                            isLoading.value = false
                             Text(stringResource(R.string.login_button_text))
                         }
-                    }
+
+//                    Crossfade(targetState = if (isLoading.value) 1f else 0f, animationSpec = spring(
+//                        dampingRatio = 2f,
+//                        stiffness = Spring.StiffnessHigh
+//                    )) { isLoading ->
+//                        if (isLoading == 1f) {
+//                            CircularProgressIndicator(
+//                                Modifier
+//                                    .size(15.dp)
+//                                    .align(Alignment.CenterVertically),
+//                                strokeWidth = 1.dp
+//                            )
+//                        } else {
+//                            Text(stringResource(R.string.login_button_text))
+//                        }
+
+
+                   // }
             }
         }
 }
