@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 
 class TreatmentModelView: ViewModel(), PreferenceDataType, RetrorfitFun {
-    private var result: List<TreatmentModel?>? = null
-    val treatmentFlow: Flow<List<TreatmentModel?>?> = flow{
+    private var result: List<TreatmentModel>? = null
+    val treatmentFlow: Flow<List<TreatmentModel>?> = flow{
         when (ssm.fetch(USER_TYPE)) {
             "doctor" -> {
 
@@ -19,7 +19,7 @@ class TreatmentModelView: ViewModel(), PreferenceDataType, RetrorfitFun {
                         get(
                             "all",
                             "treatment", "Bearer " + ssm.fetch(USER_TOKEN)
-                        ) as List<TreatmentModel?>?
+                        ) as List<TreatmentModel>?
                 }
                 emit(result)
             }
@@ -28,7 +28,7 @@ class TreatmentModelView: ViewModel(), PreferenceDataType, RetrorfitFun {
                     get(
                         "filtered",
                         "treatment", "Bearer " + ssm.fetch(USER_TOKEN), ssm.fetch(USER_ID)!!
-                    ) as List<TreatmentModel?>?
+                    ) as List<TreatmentModel>?
         }
         }
     }
