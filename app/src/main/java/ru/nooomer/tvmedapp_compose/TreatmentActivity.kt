@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -32,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.nooomer.tvmedapp_compose.interfaces.*
 import ru.nooomer.tvmedapp_compose.models.*
@@ -47,7 +49,7 @@ var data = mutableListOf<MutableList<String?>>()
 class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
     private val cardsViewModel by viewModels<CardsViewModel>()
     private lateinit var mContext: Context
-    val treatmentFlow = TreatmentModelView().treatmentFlow
+    private val treatmentFlow = TreatmentModelView().treatmentFlow
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //load()
@@ -60,30 +62,64 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                 ) { // the key define when the block is relaunched // Your coroutine code her
                     mContext = LocalContext.current
                     CardsScreen(cardsViewModel)
-                    Column(
-                        modifier = Modifier.padding(all = 10.dp),
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.Bottom,
-                    ) {
-                        ExtendedFloatingActionButton(
-                            onClick = {
-                                ssm.clearSession()
-                                val activity = (this@TreatmentActivity as? Activity)
-                                activity?.startActivity(Intent(this@TreatmentActivity, MainActivity::class.java))
-                                activity?.finish()
-                            }
-                        ) {
-
-                        }
-                    }
+                    LogoutButton()
+                    AddNewTreatmentButton()
                     //Greeting2(mContext)
                 }
             }
         }
     }
+    @Composable
+    private fun AddNewTreatmentButton() {
+        Column(
+            modifier = Modifier.padding(all = 10.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom,
+        ) {
+            ExtendedFloatingActionButton(
+                onClick = {
+
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun LogoutButton() {
+        Column(
+            modifier = Modifier.padding(all = 10.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Bottom,
+        ) {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    ssm.clearSession()
+                    val activity = (this@TreatmentActivity as? Activity)
+                    activity?.startActivity(
+                        Intent(
+                            this@TreatmentActivity,
+                            MainActivity::class.java
+                        )
+                    )
+                    activity?.finish()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        }
+    }
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-    @OptIn(ExperimentalLifecycleComposeApi::class)
     @Composable
     fun CardsScreen(viewModel: CardsViewModel) {
         val cards by viewModel.cards.collectAsStateWithLifecycle()
@@ -283,8 +319,8 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
         }
     }
     @Composable
-    fun alert(): Boolean{
-        var tmp  = remember { mutableStateOf(false) }
+    fun Alert(): Boolean{
+        val tmp  = remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = {
                 // Dismiss the dialog when the user clicks outside the dialog or on the back
@@ -344,7 +380,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
         val openDialog = remember { mutableStateOf(false) }
 
         if (openDialog.value) {
-            openDialog.value = alert()
+            openDialog.value = Alert()
         }
         LazyColumn(
             modifier = Modifier

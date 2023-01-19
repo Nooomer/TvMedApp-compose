@@ -8,37 +8,18 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -46,14 +27,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import ru.nooomer.tvmedapp_compose.RetrifitService.SessionManager
+import androidx.compose.ui.unit.*
+import kotlinx.coroutines.*
+import ru.nooomer.tvmedapp_compose.RetrofitService.*
 import ru.nooomer.tvmedapp_compose.interfaces.*
 import ru.nooomer.tvmedapp_compose.models.*
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
@@ -87,15 +63,15 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
                             (mContext as Activity).finish()
                         }
                     }
-                    Greeting(mContext)
+                    LoginWindow(mContext)
                 }
             }
         }
     }
-    fun login_click(login_text: String, password_text: String, context: Context){
-        if(!ssm.validation() and (login_text!="")) {
+    fun loginClick(loginText: String, passwordText: String, context: Context){
+        if(!ssm.validation() and (loginText!="")) {
             scope.launch {
-                val def = scope.asyncIO { result = auth(login_text, password_text) }
+                val def = scope.asyncIO { result = auth(loginText, passwordText) }
                 def.await()
                 if ((result?.token == null) or (result == null)) {
                     val toast = Toast.makeText(
@@ -131,15 +107,15 @@ fun checkValidPhone(s: String): Boolean{
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting(context: Context) {
+fun LoginWindow(context: Context) {
     val phone = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    var button_enable = remember { mutableStateOf(false) }
-    var phone_error = remember { mutableStateOf(false) }
-    var label_color = remember { mutableStateOf(Color.Black) }
-    var first_loading = remember { mutableStateOf(true) }
+    val buttonEnable = remember { mutableStateOf(false) }
+    val phoneError = remember { mutableStateOf(false) }
+    val labelColor = remember { mutableStateOf(Color.Black) }
+    val firstLoading = remember { mutableStateOf(true) }
     val isLoading = remember { mutableStateOf(false )}
-    val value_counter = remember { mutableStateOf(0 )}
+    val valueCounter = remember { mutableStateOf(0 )}
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -153,8 +129,8 @@ fun Greeting(context: Context) {
                 TextField(
                     phone.value,
                     { phone.value = it
-                        button_enable.value = (password.value!="") and (phone.value!="")
-                        value_counter.value = it.length
+                        buttonEnable.value = (password.value!="") and (phone.value!="")
+                        valueCounter.value = it.length
                         },
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -171,17 +147,17 @@ fun Greeting(context: Context) {
                     label = {
                         Text(
                             stringResource(R.string.phone_number_text),
-                            color = label_color.value
+                            color = labelColor.value
                         )
                     },
                     trailingIcon = {
-                        Crossfade(targetState = if (phone_error.value) 1f else 0f, animationSpec = spring(
+                        Crossfade(targetState = if (phoneError.value) 1f else 0f, animationSpec = spring(
                             dampingRatio = 2f,
                             stiffness = Spring.StiffnessMedium
-                        )) { phone_error ->
+                        )) { phoneError ->
                             // note that it's required to use the value passed by Crossfade
                             // instead of your state value
-                            if (phone_error == 1f) {
+                            if (phoneError == 1f) {
                                 Icon(imageVector = Icons.Outlined.Close, contentDescription = null, tint = Color.Red)
                             } else {
                                 Icon(imageVector = Icons.Outlined.Phone, contentDescription = null, tint = Color.Black)
@@ -197,26 +173,26 @@ fun Greeting(context: Context) {
                     modifier = Modifier.height(70.dp)
                         .onFocusEvent {focusState ->
                             when{
-                                (!focusState.isFocused and !first_loading.value) and (value_counter.value>0) ->{
+                                (!focusState.isFocused and !firstLoading.value) and (valueCounter.value>0) ->{
                                     if(checkValidPhone(phone.value)) {
-                                        phone_error.value = true
-                                        button_enable.value = false
-                                        label_color.value = Color.Red
+                                        phoneError.value = true
+                                        buttonEnable.value = false
+                                        labelColor.value = Color.Red
                                     }
                                     else{
-                                        phone_error.value = false
-                                        button_enable.value = true
-                                        label_color.value = Color.Black
+                                        phoneError.value = false
+                                        buttonEnable.value = true
+                                        labelColor.value = Color.Black
                                     }
                                 }
                                 else ->{
-                                    first_loading.value = false
-                                    phone_error.value = false
-                                    label_color.value = Color.Black
+                                    firstLoading.value = false
+                                    phoneError.value = false
+                                    labelColor.value = Color.Black
                                 }
                             }
                                         },
-                    isError = phone_error.value
+                    isError = phoneError.value
                 )
 
             }
@@ -229,7 +205,7 @@ fun Greeting(context: Context) {
                     password.value,
                     {
                         password.value = it
-                        button_enable.value = (password.value!="") and (phone.value!="")
+                        buttonEnable.value = (password.value!="") and (phone.value!="")
                     },
                     visualTransformation = {
                         PasswordVisualTransformation().filter(it)
@@ -262,10 +238,10 @@ fun Greeting(context: Context) {
 
             }
             Button(
-                enabled = button_enable.value and !phone_error.value,
+                enabled = buttonEnable.value and !phoneError.value,
                 modifier = Modifier.width(300.dp).padding(all = 10.dp)
                     .align(Alignment.CenterHorizontally),onClick = {
-                    MainActivity().login_click(phone.value,password.value, context)
+                    MainActivity().loginClick(phone.value,password.value, context)
                     isLoading.value = true
                 }){ if (isLoading.value) {
                             CircularProgressIndicator(
@@ -303,8 +279,8 @@ fun Greeting(context: Context) {
 }
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun LoginWindowPreview() {
     TvMedApp_composeTheme {
-        Greeting(LocalContext.current)
+        LoginWindow(LocalContext.current)
     }
 }

@@ -8,9 +8,7 @@ import retrofit2.http.*
 interface API {
 
     /**Auth methods.
-     * @param methodName it method name which need use. Type - [String]
-     * @param phoneNumber it phone number which use like login. Type - [String]
-     * @param password it password for auth. Type - [String]
+     * @param body is a Json Body like [LoginData]
      *@return [AuthModel] */
     @POST("/{method}")
     fun auth(

@@ -1,6 +1,6 @@
 package ru.nooomer.tvmedapp_compose.interfaces
 
-import ru.nooomer.tvmedapp_compose.RetrifitService.Common
+import ru.nooomer.tvmedapp_compose.RetrofitService.Common
 import ru.nooomer.tvmedapp_compose.models.*
 import retrofit2.Call
 import retrofit2.Callback

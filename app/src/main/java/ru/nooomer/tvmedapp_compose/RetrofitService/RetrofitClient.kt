@@ -1,4 +1,4 @@
-package ru.nooomer.tvmedapp_compose.RetrifitService
+package ru.nooomer.tvmedapp_compose.RetrofitService
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

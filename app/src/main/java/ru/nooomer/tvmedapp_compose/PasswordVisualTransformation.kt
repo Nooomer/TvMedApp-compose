@@ -6,7 +6,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
 
-class PasswordVisualTransformation(val mask: Char = '\u2022') : VisualTransformation {
+class PasswordVisualTransformation(private val mask: Char = '\u2022') : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         return TransformedText(
             text = AnnotatedString(mask.toString().repeat(text.text.length)),
