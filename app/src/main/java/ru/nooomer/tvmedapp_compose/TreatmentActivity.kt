@@ -18,6 +18,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -25,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -135,6 +135,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                     ExpandableCard(
                         card = card,
                         onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
+                        onCardMessageClick = { card.id },
                         expanded = expandedCardIds!!.contains(card.id),
                     )
                 }
@@ -146,6 +147,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
     fun ExpandableCard(
         card: TreatmentModel,
         onCardArrowClick: () -> Unit,
+        onCardMessageClick: () -> Unit,
         expanded: Boolean,
     ) {
         val transitionState = remember {
@@ -162,7 +164,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
         val cardPaddingHorizontal by transition.animateDp({
             tween(durationMillis = 450)
         }, label = "paddingTransition") {
-            if (expanded) 48.dp else 24.dp
+            if (expanded) 24.dp else 24.dp
         }
         val cardElevation by transition.animateDp({
             tween(durationMillis = 450)
@@ -206,10 +208,38 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                         degrees = arrowRotationDegree,
                         onClick = onCardArrowClick
                     )
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd),
+                        onClick = {
+
+                        },
+                        content = {
+                            Icon(Icons.Filled.Message, "message")
+                        }
+                    )
+                    /*CardMessage(
+                        onClick = onCardMessageClick
+                    )*/
                 }
                 ExpandableContent(visible = expanded, card)
             }
         }
+    }
+    @Composable
+    fun CardMessage(
+        onClick: () -> Unit
+    ) {
+        IconButton(
+            onClick = onClick,
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_expand_less_24),
+                    contentDescription = "Expandable Arrow",
+                    modifier = Modifier,
+                )
+            }
+        )
     }
 
     @Composable
@@ -458,12 +488,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     @ExperimentalFoundationApi
-    fun ListItem(
-        doctorSurename: String?,
-        patientSurename: String?,
-        dateOfStart: String?,
-        modifier: Modifier = Modifier
-    ) {
+    fun ListItem(doctorSurename: String?, patientSurename: String?, dateOfStart: String?, modifier: Modifier = Modifier) {
         Surface(
             elevation = 8.dp,
             shape = RoundedCornerShape(8.dp),
