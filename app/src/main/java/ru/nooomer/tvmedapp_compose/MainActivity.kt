@@ -24,6 +24,9 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +43,8 @@ private val scope = CoroutineScope(Dispatchers.Main + Job())
 private var result: AuthModel? = null
 private var result2: List<UserModel?>? = null
 private var isFailed: Boolean = false
+val phoneErrorSemanticsKey = SemanticsPropertyKey<Boolean>("PhoneErrorSemantics")
+var SemanticsPropertyReceiver.phoneErrorSemantics by phoneErrorSemanticsKey
 class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
     private lateinit var mContext: Context
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -170,7 +175,11 @@ fun LoginWindow(context: Context) {
                         bottomEnd = CornerSize(10.dp),
                         bottomStart = CornerSize(10.dp)
                     ),
-                    modifier = Modifier.height(70.dp)
+                    modifier = Modifier
+                        .semantics {
+                            phoneErrorSemantics = phoneError.value
+                        }
+                        .height(70.dp)
                         .onFocusEvent {focusState ->
                             when{
                                 (!focusState.isFocused and !firstLoading.value) and (valueCounter.value>0) ->{

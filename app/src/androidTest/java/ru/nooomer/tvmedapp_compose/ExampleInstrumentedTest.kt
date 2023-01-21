@@ -1,58 +1,55 @@
 package ru.nooomer.tvmedapp_compose
 
-import android.content.Intent
-import androidx.compose.ui.platform.textInputServiceFactory
-import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.rules.activityScenarioRule
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.*
-import org.junit.After
-
+import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-@RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
-    @Test
-    fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("ru.nooomer.tvmedapp_compose", appContext.packageName)
-    }
-    @Test
-    fun checkButtonDisabled() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-
-        assertEquals("ru.nooomer.tvmedapp_compose", appContext.packageName)
-    }
-}
 @RunWith(AndroidJUnit4::class)
 class MainActivityUiTest {
-    private lateinit var scenario: ActivityScenario<MainActivity>
     @JvmField
     @Rule
-    val rule = activityScenarioRule<MainActivity>()
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
     @Test
-    fun someTest() {
-        scenario = rule.scenario
-        scenario.onActivity {
-
-        }
+    fun checkDisabledButtonWoutText() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Войти").assertIsNotEnabled()
     }
-    @After
-    fun cleanup() {
-        scenario.close()
+    @Test
+    fun checkDisabledButtonOnlyWithPhoneText() {
+        composeTestRule.waitForIdle()
+        getTextFieldNodeAndSetText("Номер телефона", "89534500038")
+        composeTestRule.onNodeWithText("Войти").assertIsNotEnabled()
+    }
+    @Test
+    fun checkDisabledButtonOnlyWithPasswordText() {
+        composeTestRule.waitForIdle()
+        getTextFieldNodeAndSetText("Пароль", "1234")
+        composeTestRule.onNodeWithText("Войти").assertIsNotEnabled()
+    }
+    @Test
+    fun checkEnabledButtonWithPasswordAndPhoneText() {
+        composeTestRule.waitForIdle()
+        getTextFieldNodeAndSetText("Номер телефона", "89534500038")
+        getTextFieldNodeAndSetText("Пароль", "1234")
+        composeTestRule.onNodeWithText("Войти").assertIsEnabled()
+    }
+    @Test
+    fun checkOutlinedLowPhoneNumber() {
+        composeTestRule.waitForIdle()
+        getTextFieldNodeAndSetText("Номер телефона", "1234")
+        composeTestRule.onNodeWithText("Пароль").performClick()
+        composeTestRule.onRoot().printToLog("TAG")
+        val node = composeTestRule.onNode(SemanticsMatcher.expectValue(phoneErrorSemanticsKey, true)).printToLog("TAG")
+    }
+
+    private fun getTextFieldNodeAndSetText(nodeName: String, text: String){
+        val textFiledNode = composeTestRule.onNodeWithText(nodeName, useUnmergedTree = false)
+        textFiledNode.performClick()
+        textFiledNode.performTextInput(text)
     }
 }
