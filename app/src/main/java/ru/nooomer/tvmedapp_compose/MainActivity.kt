@@ -141,6 +141,7 @@ fun LoginWindow(context: Context) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
                         unfocusedTextColor = Color.Black,
+                        focusedTextColor = Color.Black,
                         containerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
@@ -148,6 +149,8 @@ fun LoginWindow(context: Context) {
                         errorIndicatorColor = Color.Transparent,
                         errorLabelColor = Color.Red,
                         errorCursorColor = Color.Red,
+                        errorContainerColor = Color.LightGray,
+                        errorTextColor = Color.Black,
                     ),
                     label = {
                         Text(
@@ -161,8 +164,6 @@ fun LoginWindow(context: Context) {
                             stiffness = Spring.StiffnessMedium
                         ), label = ""
                         ) { phoneError ->
-                            // note that it's required to use the value passed by Crossfade
-                            // instead of your state value
                             if (phoneError == 1f) {
                                 Icon(imageVector = Icons.Outlined.Close, contentDescription = null, tint = Color.Red)
                             } else {
@@ -224,10 +225,16 @@ fun LoginWindow(context: Context) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
                         unfocusedTextColor = Color.Black,
+                        focusedTextColor = Color.Black,
                         containerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        errorLabelColor = Color.Red,
+                        errorCursorColor = Color.Red,
+                        errorContainerColor = Color.LightGray,
+                        errorTextColor = Color.Black,
                     ),
                     singleLine = true,
                     enabled = !isLoading.value,
