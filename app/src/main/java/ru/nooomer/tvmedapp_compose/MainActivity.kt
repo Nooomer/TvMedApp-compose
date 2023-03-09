@@ -140,7 +140,7 @@ fun LoginWindow(context: Context) {
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
                         containerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
@@ -159,7 +159,8 @@ fun LoginWindow(context: Context) {
                         Crossfade(targetState = if (phoneError.value) 1f else 0f, animationSpec = spring(
                             dampingRatio = 2f,
                             stiffness = Spring.StiffnessMedium
-                        )) { phoneError ->
+                        ), label = ""
+                        ) { phoneError ->
                             // note that it's required to use the value passed by Crossfade
                             // instead of your state value
                             if (phoneError == 1f) {
@@ -222,7 +223,7 @@ fun LoginWindow(context: Context) {
                     textStyle = TextStyle(fontSize = 28.sp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
                         containerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
