@@ -38,9 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.nooomer.tvmedapp_compose.interfaces.*
 import ru.nooomer.tvmedapp_compose.models.*
-import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
-import ru.nooomer.tvmedapp_compose.ui.theme.cardCollapsedBackgroundColor
-import ru.nooomer.tvmedapp_compose.ui.theme.cardExpandedBackgroundColor
+import ru.nooomer.tvmedapp_compose.ui.theme.*
 
 private var result: List<TreatmentModel?>? = null
 private var result2: List<UserModel?>? = null
@@ -208,38 +206,26 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                         degrees = arrowRotationDegree,
                         onClick = onCardArrowClick
                     )
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd),
-                        onClick = {
-
-                        },
-                        content = {
-                            Icon(Icons.Filled.Message, "message")
-                        }
-                    )
-                    /*CardMessage(
-                        onClick = onCardMessageClick
-                    )*/
+                    ChatButton(Modifier.align(Alignment.CenterEnd), card.id)
                 }
                 ExpandableContent(visible = expanded, card)
             }
         }
     }
+
     @Composable
-    fun CardMessage(
-        onClick: () -> Unit
-    ) {
-        IconButton(
-            onClick = onClick,
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_expand_less_24),
-                    contentDescription = "Expandable Arrow",
-                    modifier = Modifier,
-                )
-            }
-        )
+    private fun ChatButton(modifier: Modifier, cardId: Int) {
+            IconButton(
+                modifier = modifier,
+                onClick = {
+                    val activity = (mContext as? Activity)
+                    mContext.startActivity(Intent(mContext, ChatActivity::class.java))
+                    activity?.finish()
+                },
+                content = {
+                    Icon(Icons.Filled.Message, "message")
+                }
+            )
     }
 
     @Composable
@@ -270,7 +256,6 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
         )
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun ExpandableContent(
         visible: Boolean = true,
