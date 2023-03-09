@@ -37,6 +37,11 @@ interface API {
         @Path("method") methodName: String?,
         @Header("Authorization") token: String?
     ): Call<List<TreatmentModel?>?>?
+    @GET("treatment/{id}/chat")
+    fun getAllMessages(
+        @Path("id") chatId: String?,
+        @Header("Authorization") token: String?
+    ): Call<List<MessagesModel?>?>?
     @GET("/{method}/patient/{id}")
             /**Get treatment by ID methods.
              *  @param id Treatment id information about which need get. Type - [String]

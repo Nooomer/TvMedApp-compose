@@ -11,6 +11,7 @@ interface RetrorfitFun {
         val mService = Common.retrofitService
         var result: List<UserModel?>?
         var result2: List<TreatmentModel?>?
+       var result3: List<MessagesModel?>?
 
         when (funType) {
             "all" -> {
@@ -34,6 +35,11 @@ interface RetrorfitFun {
                         val call = mService.getAllTreatment("treatment", token)
                         result2 =  call?.execute()?.body()
                         return result2
+                    }
+                    "messages" ->{
+                        val call = mService.getAllMessages(params[0], token)
+                        result3 =  call?.execute()?.body()
+                        return result3
                     }
                 }
 
