@@ -26,6 +26,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,30 +72,21 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
                 .fillMaxSize(),
         ) {
             items(messages!!, MessagesModel::id) { message ->
-                var modifier = Modifier.padding()
-                var arragement: Arrangement.Horizontal
-                if(message.fromId == ssm.fetch(ssm.USER_ID)?.toInt()){
-                    arragement = Arrangement.End
-                    //modifier = Modifier.padding(start = 100.dp, end = 15.dp)
+
+                var arragement: Arrangement.Horizontal =
+                    if(message.fromId == ssm.fetch(ssm.USER_ID)?.toInt()){
+                    Arrangement.End
                 } else{
-                    arragement = Arrangement.Start
-                    //modifier = Modifier.padding(start = 15.dp, end = 100.dp)
+                    Arrangement.Start
                 }
-                MessagesList(modifier, message, arragement)
+                MessageBubble(Modifier, arragement, message)
             }
         }
     }
 }
 @Composable
 fun MessagesList(modifier: Modifier, message: MessagesModel, arragement: Arrangement.Horizontal) {
-    androidx.compose.material.Surface(
-        elevation = 8.dp,
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier
-            .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 7.dp),
-    ) {
             MessageBubble(modifier, arragement, message)
-    }
 }
 @Composable
 private fun MessageBubble(
@@ -102,13 +95,22 @@ private fun MessageBubble(
     message: MessagesModel
 ) {
     Row(
-        modifier = Modifier,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
         horizontalArrangement = allignment,
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (message.messageText != null) {
             Text(
                 modifier = Modifier
+                    .widthIn(max = 220.dp)
+                    .drawBehind {
+                        drawRoundRect(
+                            Color(0xFFBBAAEE),
+                            cornerRadius = CornerRadius(10.dp.toPx())
+                        )
+                    }
                     .padding(6.dp),
                 text = message.messageText!!,
                 fontSize = 18.sp
