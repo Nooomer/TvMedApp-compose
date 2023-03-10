@@ -5,18 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,7 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ru.nooomer.tvmedapp_compose.models.*
+import ru.nooomer.tvmedapp_compose.models.MessagesModel
+import ru.nooomer.tvmedapp_compose.models.MessagesViewModel
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 
 class ChatActivity : ComponentActivity() {
@@ -69,7 +66,8 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
         LazyColumn(
             Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .wrapContentHeight(),
         ) {
             items(messages!!, MessagesModel::id) { message ->
 
