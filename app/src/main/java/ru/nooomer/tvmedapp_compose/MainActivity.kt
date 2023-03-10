@@ -184,16 +184,23 @@ fun LoginWindow(context: Context) {
                         .height(70.dp)
                         .onFocusEvent {focusState ->
                             when{
-                                (!focusState.isFocused and !firstLoading.value) and (valueCounter.value>0) ->{
+                                (!focusState.isFocused and !firstLoading.value) and (valueCounter.value<11) ->{
                                     if(checkValidPhone(phone.value)) {
                                         phoneError.value = true
                                         buttonEnable.value = false
                                         labelColor.value = Color.Red
                                     }
                                     else{
-                                        phoneError.value = false
-                                        buttonEnable.value = true
-                                        labelColor.value = Color.Black
+                                        if((password.value=="") or (phone.value.length!=11)){
+                                            phoneError.value = false
+                                            buttonEnable.value = false
+                                            labelColor.value = Color.Black
+                                        }
+                                        else {
+                                            phoneError.value = false
+                                            buttonEnable.value = true
+                                            labelColor.value = Color.Black
+                                        }
                                     }
                                 }
                                 else ->{
@@ -216,7 +223,7 @@ fun LoginWindow(context: Context) {
                     password.value,
                     {
                         password.value = it
-                        buttonEnable.value = (password.value!="") and (phone.value!="")
+                        buttonEnable.value = (password.value!="") and ((phone.value!="") or (!phoneError.value) or (phone.value.length == 11))
                     },
                     visualTransformation = {
                         PasswordVisualTransformation().filter(it)
@@ -255,7 +262,7 @@ fun LoginWindow(context: Context) {
 
             }
             Button(
-                enabled = buttonEnable.value and !phoneError.value,
+                enabled = buttonEnable.value and !phoneError.value and ((phone.value!="") or (!phoneError.value) or (phone.value.length == 11)),
                 modifier = Modifier.width(300.dp).padding(all = 10.dp)
                     .align(Alignment.CenterHorizontally),onClick = {
                     MainActivity().loginClick(phone.value,password.value, context)
