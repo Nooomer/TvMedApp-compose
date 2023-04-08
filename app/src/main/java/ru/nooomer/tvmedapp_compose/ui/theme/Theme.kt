@@ -19,27 +19,41 @@ import androidx.core.view.WindowCompat
 val cardCollapsedBackgroundColor = Color(0xFFFEFFFD)
 val cardExpandedBackgroundColor = Color(0xFFFFDA6D)
 
+/*@OptIn(ExperimentalMaterial3Api::class)
+val loginFields = TextFieldDefaults.textFieldColors(
+unfocusedTextColor = Color.Black,
+focusedTextColor = Color.Black,
+containerColor = Color.LightGray,
+focusedIndicatorColor = Color.Transparent,
+disabledIndicatorColor = Color.Transparent,
+unfocusedIndicatorColor = Color.Transparent,
+errorIndicatorColor = Color.Transparent,
+errorLabelColor = Color.Red,
+errorCursorColor = Color.Red,
+errorContainerColor = Color.LightGray,
+errorTextColor = Color.Black,
+)*/
+
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    background = Color.LightGray
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
-
-
+    tertiary = Pink40,
+    background = Color.LightGray
     /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+surface = Color(0xFFFFFBFE),
+onPrimary = Color.White,
+onSecondary = Color.White,
+onTertiary = Color.White,
+onBackground = Color(0xFF1C1B1F),
+onSurface = Color(0xFF1C1B1F),
+*/
 )
 
 @Composable
