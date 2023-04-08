@@ -1,7 +1,5 @@
 package ru.nooomer.tvmedapp_compose.models
 
-import java.util.*
-
 data class MessagesModel(
     var id: Int,
     var fromId: Int,

@@ -32,7 +32,7 @@ class HelpActivity() : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting3(modifier: Modifier = Modifier) {
+fun Greeting3() {
 
     Text("Android")
 }

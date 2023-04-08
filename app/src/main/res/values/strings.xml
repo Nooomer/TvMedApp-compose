@@ -5,7 +5,5 @@
     <string name="phone_number_text">Phone number</string>
     <string name="password_text">Password</string>
     <string name="login_button_text">Login</string>
-    <string name="doctor">"Doctor: "</string>
-    <string name="patient">"Patient: "</string>
-    <string name="title_activity_chat2">ChatActivity2</string>
+    <string name="title_activity_chat2">Treatment Chat</string>
 </resources>

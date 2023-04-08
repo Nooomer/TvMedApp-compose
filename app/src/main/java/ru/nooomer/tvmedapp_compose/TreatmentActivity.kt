@@ -460,7 +460,6 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     @ExperimentalFoundationApi
     fun ListItem(
