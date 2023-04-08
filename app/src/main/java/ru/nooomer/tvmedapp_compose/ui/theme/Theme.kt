@@ -19,21 +19,6 @@ import androidx.core.view.WindowCompat
 val cardCollapsedBackgroundColor = Color(0xFFFEFFFD)
 val cardExpandedBackgroundColor = Color(0xFFFFDA6D)
 
-/*@OptIn(ExperimentalMaterial3Api::class)
-val loginFields = TextFieldDefaults.textFieldColors(
-unfocusedTextColor = Color.Black,
-focusedTextColor = Color.Black,
-containerColor = Color.LightGray,
-focusedIndicatorColor = Color.Transparent,
-disabledIndicatorColor = Color.Transparent,
-unfocusedIndicatorColor = Color.Transparent,
-errorIndicatorColor = Color.Transparent,
-errorLabelColor = Color.Red,
-errorCursorColor = Color.Red,
-errorContainerColor = Color.LightGray,
-errorTextColor = Color.Black,
-)*/
-
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,

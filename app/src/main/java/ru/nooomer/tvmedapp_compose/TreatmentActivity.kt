@@ -40,17 +40,14 @@ import ru.nooomer.tvmedapp_compose.interfaces.*
 import ru.nooomer.tvmedapp_compose.models.*
 import ru.nooomer.tvmedapp_compose.ui.theme.*
 
-private var result: List<TreatmentModel?>? = null
-private var result2: List<UserModel?>? = null
-private var viewSize: Int = 0
 var data = mutableListOf<MutableList<String?>>()
-class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
+
+class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
     private val cardsViewModel by viewModels<CardsViewModel>()
     private lateinit var mContext: Context
     private val treatmentFlow = TreatmentModelView().treatmentFlow
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //load()
         setContent {
             TvMedApp_composeTheme {
                 // A surface container using the 'background' color from the theme
@@ -62,11 +59,11 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                     CardsScreen(cardsViewModel)
                     LogoutButton()
                     AddNewTreatmentButton()
-                    //Greeting2(mContext)
                 }
             }
         }
     }
+
     @Composable
     private fun AddNewTreatmentButton() {
         Column(
@@ -133,19 +130,18 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                     ExpandableCard(
                         card = card,
                         onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
-                        onCardMessageClick = { card.id },
                         expanded = expandedCardIds!!.contains(card.id),
                     )
                 }
             }
         }
     }
+
     @SuppressLint("UnusedTransitionTargetStateParameter")
     @Composable
     fun ExpandableCard(
         card: TreatmentModel,
         onCardArrowClick: () -> Unit,
-        onCardMessageClick: () -> Unit,
         expanded: Boolean,
     ) {
         val transitionState = remember {
@@ -206,7 +202,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                         degrees = arrowRotationDegree,
                         onClick = onCardArrowClick
                     )
-                    ChatButton(Modifier.align(Alignment.CenterEnd), card.id)
+                    ChatButton(Modifier.align(Alignment.CenterEnd))
                 }
                 ExpandableContent(visible = expanded, card)
             }
@@ -214,18 +210,18 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
     }
 
     @Composable
-    private fun ChatButton(modifier: Modifier, cardId: Int) {
-            IconButton(
-                modifier = modifier,
-                onClick = {
-                    val activity = (mContext as? Activity)
-                    mContext.startActivity(Intent(mContext, ChatActivity::class.java))
-                    activity?.finish()
-                },
-                content = {
-                    Icon(Icons.Filled.Message, "message")
-                }
-            )
+    private fun ChatButton(modifier: Modifier) {
+        IconButton(
+            modifier = modifier,
+            onClick = {
+                val activity = (mContext as? Activity)
+                mContext.startActivity(Intent(mContext, ChatActivity::class.java))
+                //activity?.finish()
+            },
+            content = {
+                Icon(Icons.Filled.Message, "message")
+            }
+        )
     }
 
     @Composable
@@ -287,55 +283,49 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
             exit = exitTransition
         ) {
             Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.Top) {
-                //Spacer(modifier = Modifier.heightIn(100.dp))
-//                Row(
-//                    modifier = Modifier.fillMaxSize(),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-                    Column(
-                        modifier = Modifier,
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        if (card.doctorSurname != null) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 6.dp),
-                                text = "Врач: ${card.doctorSurname!!}",
-                                fontSize = 24.sp
-                            )
-                        }
-                        if (card.patientSurename != null) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 6.dp),
-                                text = "Пациент: ${card.patientSurename!!}",
-                                fontSize = 24.sp
-                            )
-                        }
+                Column(
+                    modifier = Modifier,
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    if (card.doctorSurname != null) {
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 6.dp),
+                            text = "Врач: ${card.doctorSurname!!}",
+                            fontSize = 24.sp
+                        )
                     }
-                    Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
-                        if (card.startdate != null) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 6.dp),
-                                text = "Дата создания: ${card.startdate}",
-                                fontSize = 24.sp
-                            )
-                        }
+                    if (card.patientSurename != null) {
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 6.dp),
+                            text = "Пациент: ${card.patientSurename!!}",
+                            fontSize = 24.sp
+                        )
                     }
-                //}
+                }
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    if (card.startdate != null) {
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 6.dp),
+                            text = "Дата создания: ${card.startdate}",
+                            fontSize = 24.sp
+                        )
+                    }
+                }
             }
         }
     }
+
     @Composable
-    fun Alert(): Boolean{
-        val tmp  = remember { mutableStateOf(false) }
+    fun Alert(): Boolean {
+        val tmp = remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = {
                 // Dismiss the dialog when the user clicks outside the dialog or on the back
@@ -369,7 +359,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
             }
         )
         return tmp.value
-}
+    }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
@@ -420,7 +410,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                     targetState = if (isLoading.value) 0f else 1f, animationSpec = spring(
                         dampingRatio = 2f,
                         stiffness = Spring.StiffnessMedium
-                    )
+                    ), label = ""
                 ) { loader ->
                     // note that it's required to use the value passed by Crossfade
                     // instead of your state value
@@ -473,7 +463,12 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     @ExperimentalFoundationApi
-    fun ListItem(doctorSurename: String?, patientSurename: String?, dateOfStart: String?, modifier: Modifier = Modifier) {
+    fun ListItem(
+        doctorSurename: String?,
+        patientSurename: String?,
+        dateOfStart: String?,
+        modifier: Modifier = Modifier
+    ) {
         Surface(
             elevation = 8.dp,
             shape = RoundedCornerShape(8.dp),
@@ -481,43 +476,43 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
                 .height(80.dp)
                 .padding(start = 10.dp, end = 10.dp),
         ) {
-                Column(
-                    modifier = modifier.fillMaxHeight(),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    if (doctorSurename != null) {
-                        Text(
-                            modifier = modifier
-                                .padding(start = 6.dp),
-                            text = doctorSurename,
-                            fontSize = 24.sp
-                        )
-                    }
-                    if (patientSurename != null) {
-                        Text(
-                            modifier = modifier
-                                .padding(start = 6.dp),
-                            text = patientSurename,
-                            fontSize = 24.sp
-                        )
-                    }
-                }
-            }
             Column(
-                modifier = modifier,
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Bottom
+                modifier = modifier.fillMaxHeight(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Top
             ) {
-                if (dateOfStart != null) {
+                if (doctorSurename != null) {
                     Text(
-                        modifier = modifier.fillMaxWidth()
-                            .padding(end = 6.dp),
-                        text = dateOfStart,
+                        modifier = modifier
+                            .padding(start = 6.dp),
+                        text = doctorSurename,
+                        fontSize = 24.sp
+                    )
+                }
+                if (patientSurename != null) {
+                    Text(
+                        modifier = modifier
+                            .padding(start = 6.dp),
+                        text = patientSurename,
                         fontSize = 24.sp
                     )
                 }
             }
+        }
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            if (dateOfStart != null) {
+                Text(
+                    modifier = modifier.fillMaxWidth()
+                        .padding(end = 6.dp),
+                    text = dateOfStart,
+                    fontSize = 24.sp
+                )
+            }
+        }
     }
 
     @Preview(showBackground = true)
@@ -527,11 +522,15 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun 
             Greeting2(LocalContext.current)
         }
     }
+
     @Preview(showBackground = true)
     @Composable
     fun ExpandleCard() {
         TvMedApp_composeTheme {
-            ExpandableContent(true, TreatmentModel(0,"Ампилогов","Ампилогов","12-12-2022 14:12:12 07"))
+            ExpandableContent(
+                true,
+                TreatmentModel(0, "Ампилогов", "Ампилогов", "12-12-2022 14:12:12 07")
+            )
         }
     }
 }

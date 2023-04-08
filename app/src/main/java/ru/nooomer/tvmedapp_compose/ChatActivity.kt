@@ -78,7 +78,6 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
         Column(
             Modifier
                 .fillMaxSize(),
-            //verticalArrangement = Arrangement.SpaceBetween
         ) {
             LazyColumn(
                 Modifier
@@ -114,14 +113,11 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
                     //.defaultMinSize(minHeight = 100.dp)
                     .requiredHeightIn(min = 130.dp)
                     .padding(start = 10.dp, bottom = 10.dp)
-                )
+            )
         }
     }
 }
-@Composable
-fun MessagesList(modifier: Modifier, message: MessagesModel, arragement: Arrangement.Horizontal) {
-            MessageBubble(modifier, arragement, message)
-}
+
 @Composable
 private fun MessageBubble(
     modifier: Modifier,
@@ -153,21 +149,6 @@ private fun MessageBubble(
             )
         }
     }
-}
-
-@Composable
-fun Message(type: Boolean){
-    /*Column {
-        Box {
-            CardTitle(title = "Обращение №${card.id}")
-            CardArrow(
-                degrees = arrowRotationDegree,
-                onClick = onCardArrowClick
-            )
-            ChatButton(Modifier.align(Alignment.CenterEnd), card.id)
-        }
-        ExpandableContent(visible = expanded, card)
-    }*/
 }
 
 @Composable

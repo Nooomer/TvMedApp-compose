@@ -1,9 +1,12 @@
 package ru.nooomer.tvmedapp_compose.RetrofitService
 
 import android.content.Context
-import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.Response
+import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
+
 
 /**
  * Interceptor to add auth token to requests
@@ -21,4 +24,5 @@ class AuthInterceptor(context: Context) : Interceptor, PreferenceDataType {
 
         return chain.proceed(requestBuilder.build())
     }
+
 }
