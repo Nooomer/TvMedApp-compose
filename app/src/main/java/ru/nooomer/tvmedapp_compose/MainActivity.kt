@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrorfitFun {
             TvMedApp_composeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    //color = MaterialTheme.colorScheme.background
                 ) {
                     mContext = LocalContext.current
                     // A surface container using the 'background' color from the theme
@@ -137,7 +137,7 @@ fun LoginWindow(context: Context) {
                         buttonEnable.value = (password.value!="") and (phone.value!="")
                         valueCounter.value = it.length
                         },
-                    textStyle = TextStyle(fontSize = 28.sp),
+                    textStyle = MaterialTheme.typography.titleLarge,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
                         unfocusedTextColor = Color.Black,
@@ -228,7 +228,7 @@ fun LoginWindow(context: Context) {
                     visualTransformation = {
                         PasswordVisualTransformation().filter(it)
                     },
-                    textStyle = TextStyle(fontSize = 28.sp),
+                    textStyle = MaterialTheme.typography.titleLarge,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     colors = TextFieldDefaults.textFieldColors(
                         unfocusedTextColor = Color.Black,
