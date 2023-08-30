@@ -7,13 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.nooomer.tvmedapp_compose.api.models.MessageDto
 
 class MessagesViewModel : ViewModel() {
     val messagesFlow = MessagesModelView().messagesFlow
 
 
-    private val _messages = MutableStateFlow(listOf<MessagesModel>())
-    val messages: StateFlow<List<MessagesModel>?> get() = _messages
+    private val _messages = MutableStateFlow(listOf<MessageDto>())
+    val messages: StateFlow<List<MessageDto>?> get() = _messages
 
     private val _expandedMessagesIdsList = MutableStateFlow(listOf<Int>())
     val expandedMessagesIdsList: StateFlow<List<Int>?> get() = _expandedMessagesIdsList
@@ -25,7 +26,7 @@ class MessagesViewModel : ViewModel() {
     private fun getFakeData() {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
-                var testList: List<MessagesModel>? = null
+                var testList: List<MessageDto>? = null
                 messagesFlow.collect {
                        testList = it
                 }

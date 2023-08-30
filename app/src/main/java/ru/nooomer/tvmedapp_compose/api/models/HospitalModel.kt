@@ -1,4 +1,4 @@
-package ru.nooomer.tvmedapp_compose.models
+package ru.nooomer.tvmedapp_compose.api.models
 
 data class HospitalModel(
     val id:Int,
