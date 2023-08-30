@@ -2,7 +2,6 @@ package ru.nooomer.tvmedapp_compose
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,31 +19,48 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.android.ext.android.inject
+import ru.nooomer.tvmedapp_compose.RetrofitService.SessionManager
+import ru.nooomer.tvmedapp_compose.api.models.SymptomDto
+import ru.nooomer.tvmedapp_compose.api.models.TreatmentDto
 import ru.nooomer.tvmedapp_compose.interfaces.*
 import ru.nooomer.tvmedapp_compose.models.*
 import ru.nooomer.tvmedapp_compose.ui.theme.*
+import java.util.UUID
 
 var data = mutableListOf<MutableList<String?>>()
 
-class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
+class TreatmentActivity : ComponentActivity(), PreferenceDataType {
     private val cardsViewModel by viewModels<CardsViewModel>()
-    private lateinit var mContext: Context
+    private val symptomViewModel by viewModels<SymptomViewModel>()
+    private val ssm by inject<SessionManager>()
     private val treatmentFlow = TreatmentModelView().treatmentFlow
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +68,8 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
             TvMedApp_composeTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) { // the key define when the block is relaunched // Your coroutine code her
-                    mContext = LocalContext.current
                     CardsScreen(cardsViewModel)
                     LogoutButton()
                     AddNewTreatmentButton()
@@ -66,22 +80,22 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
 
     @Composable
     private fun AddNewTreatmentButton() {
+        var alertDialog = remember { mutableStateOf(false) }
         Column(
             modifier = Modifier.padding(all = 10.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom,
         ) {
-            ExtendedFloatingActionButton(
-                onClick = {
-
-                }
-            ) {
+            ExtendedFloatingActionButton(modifier = Modifier, onClick = {
+                alertDialog.value = true
+            }) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.Black
+                    imageVector = Icons.Default.Add, contentDescription = null, tint = Color.Black
                 )
             }
+        }
+        if (alertDialog.value) {
+            alertDialog.value = Alert()
         }
     }
 
@@ -92,19 +106,16 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Bottom,
         ) {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    ssm.clearSession()
-                    val activity = (this@TreatmentActivity as? Activity)
-                    activity?.startActivity(
-                        Intent(
-                            this@TreatmentActivity,
-                            MainActivity::class.java
-                        )
+            ExtendedFloatingActionButton(onClick = {
+                ssm.clearSession()
+                this@TreatmentActivity.startActivity(
+                    Intent(
+                        this@TreatmentActivity, MainActivity::class.java
                     )
-                    activity?.finish()
-                }
-            ) {
+                )
+                val activity = (this@TreatmentActivity as? Activity)
+                activity?.finish()
+            }) {
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
                     contentDescription = null,
@@ -123,24 +134,34 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
         val bgColour = remember {
             Color(ContextCompat.getColor(context, R.color.white))
         }
-
-        Scaffold(backgroundColor = bgColour) { paddingValues ->
-            LazyColumn(Modifier.padding(paddingValues)) {
-                items(cards!!, TreatmentModel::id) { card ->
-                    ExpandableCard(
-                        card = card,
-                        onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
-                        expanded = expandedCardIds!!.contains(card.id),
-                    )
+        var error = remember { mutableStateOf(false) }
+        if (cards!!.isNotEmpty()) {
+            Scaffold { paddingValues ->
+                if (!error.value) {
+                    LazyColumn(Modifier.padding(paddingValues)) {
+                        items(cards!!, TreatmentDto::id) { card ->
+                            ExpandableCard(
+                                card = card,
+                                onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
+                                expanded = expandedCardIds!!.contains(card.id),
+                            )
+                        }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("An error occurred. Try again later.")
+                    }
                 }
             }
+        } else {
+            Text("You don't have any treatment")
         }
     }
 
     @SuppressLint("UnusedTransitionTargetStateParameter")
     @Composable
     fun ExpandableCard(
-        card: TreatmentModel,
+        card: TreatmentDto,
         onCardArrowClick: () -> Unit,
         expanded: Boolean,
     ) {
@@ -167,8 +188,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
         }
         val cardRoundedCorners by transition.animateDp({
             tween(
-                durationMillis = 450,
-                easing = FastOutSlowInEasing
+                durationMillis = 450, easing = FastOutSlowInEasing
             )
         }, label = "cornersTransition") {
             if (expanded) 0.dp else 16.dp
@@ -184,23 +204,23 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
         }
 
         Card(
-            backgroundColor = cardBgColor,
-            contentColor = contentColour,
-            elevation = cardElevation,
+            colors = CardDefaults.cardColors(
+                contentColor = contentColour,
+                containerColor = cardBgColor
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = cardElevation
+            ),
             shape = RoundedCornerShape(cardRoundedCorners),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = cardPaddingHorizontal,
-                    vertical = 8.dp
-                )
+            modifier = Modifier.fillMaxWidth().padding(
+                horizontal = cardPaddingHorizontal, vertical = 8.dp
+            )
         ) {
             Column {
                 Box {
                     CardTitle(title = "Обращение №${card.id}")
                     CardArrow(
-                        degrees = arrowRotationDegree,
-                        onClick = onCardArrowClick
+                        degrees = arrowRotationDegree, onClick = onCardArrowClick
                     )
                     ChatButton(Modifier.align(Alignment.CenterEnd))
                 }
@@ -211,66 +231,55 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
 
     @Composable
     private fun ChatButton(modifier: Modifier) {
-        IconButton(
-            modifier = modifier,
-            onClick = {
-                val activity = (mContext as? Activity)
-                mContext.startActivity(Intent(mContext, ChatActivity::class.java))
-                //activity?.finish()
-            },
-            content = {
-                Icon(Icons.Filled.Message, "message")
-            }
-        )
+        IconButton(modifier = modifier, onClick = {
+            this.startActivity(
+                Intent(
+                    this, ChatActivity::class.java
+                )
+            )
+            //activity?.finish()
+        }, content = {
+            Icon(Icons.Filled.Message, "message")
+        })
     }
 
     @Composable
     fun CardArrow(
-        degrees: Float,
-        onClick: () -> Unit
+        degrees: Float, onClick: () -> Unit
     ) {
-        IconButton(
-            onClick = onClick,
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_expand_less_24),
-                    contentDescription = "Expandable Arrow",
-                    modifier = Modifier.rotate(degrees),
-                )
-            }
-        )
+        IconButton(onClick = onClick, content = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_expand_less_24),
+                contentDescription = "Expandable Arrow",
+                modifier = Modifier.rotate(degrees),
+            )
+        })
     }
 
     @Composable
     fun CardTitle(title: String) {
         Text(
             text = title,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             textAlign = TextAlign.Center,
         )
     }
 
     @Composable
     fun ExpandableContent(
-        visible: Boolean = true,
-        card: TreatmentModel
+        visible: Boolean = true, card: TreatmentDto
     ) {
         val enterTransition = remember {
             expandVertically(
-                expandFrom = Alignment.Top,
-                animationSpec = tween(450)
+                expandFrom = Alignment.Top, animationSpec = tween(450)
             ) + fadeIn(
-                initialAlpha = 0.3f,
-                animationSpec = tween(450)
+                initialAlpha = 0.3f, animationSpec = tween(450)
             )
         }
         val exitTransition = remember {
             shrinkVertically(
                 // Expand from the top.
-                shrinkTowards = Alignment.Top,
-                animationSpec = tween(450)
+                shrinkTowards = Alignment.Top, animationSpec = tween(450)
             ) + fadeOut(
                 // Fade in with the initial alpha of 0.3f.
                 animationSpec = tween(450)
@@ -278,9 +287,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
         }
 
         AnimatedVisibility(
-            visible = visible,
-            enter = enterTransition,
-            exit = exitTransition
+            visible = visible, enter = enterTransition, exit = exitTransition
         ) {
             Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.Top) {
                 Column(
@@ -288,19 +295,15 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    if (card.doctorSurname != null) {
+                    Text(
+                        modifier = Modifier.padding(start = 6.dp),
+                        text = "Пациент: ${card.patient.surename}",
+                        fontSize = 24.sp
+                    )
+                    if (card.doctor != null) {
                         Text(
-                            modifier = Modifier
-                                .padding(start = 6.dp),
-                            text = "Врач: ${card.doctorSurname!!}",
-                            fontSize = 24.sp
-                        )
-                    }
-                    if (card.patientSurename != null) {
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 6.dp),
-                            text = "Пациент: ${card.patientSurename!!}",
+                            modifier = Modifier.padding(start = 6.dp),
+                            text = "Доктор: ${card.doctor!!.surename}",
                             fontSize = 24.sp
                         )
                     }
@@ -310,14 +313,11 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.Bottom
                 ) {
-                    if (card.startdate != null) {
-                        Text(
-                            modifier = Modifier
-                                .padding(start = 6.dp),
-                            text = "Дата создания: ${card.startdate}",
-                            fontSize = 24.sp
-                        )
-                    }
+                    Text(
+                        modifier = Modifier.padding(start = 6.dp),
+                        text = "Дата создания: ${card.createdDate}",
+                        fontSize = 24.sp
+                    )
                 }
             }
         }
@@ -325,211 +325,138 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
 
     @Composable
     fun Alert(): Boolean {
-        val tmp = remember { mutableStateOf(false) }
-        AlertDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-                tmp.value = false
-            },
-            title = {
-                Text(text = "Title")
-            },
-            text = {
-                Text(text = "Turned on by default")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        tmp.value = false
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        tmp.value = false
-                    }
-                ) {
-                    Text("Dismiss")
+        val tmp = remember { mutableStateOf(true) }
+        val symptoms by symptomViewModel.symptoms.collectAsStateWithLifecycle()
+        var selectedIds: MutableSet<UUID> = mutableSetOf()
+        AlertDialog(onDismissRequest = {
+            // Dismiss the dialog when the user clicks outside the dialog or on the back
+            // button. If you want to disable that functionality, simply use an empty
+            // onDismissRequest.
+            tmp.value = false
+        }, title = {
+            Text(text = stringResource(R.string.add_new_treatment))
+        }, text = {
+            Column(
+                modifier = Modifier.requiredHeight(60.dp)
+            ) {
+                Text(text = "Choose you symptom")
+                if (!symptoms?.isEmpty()!!) {
+                    MultiComboBox("Choose symptoms", symptoms, { symptomDtoList ->
+                        symptomDtoList?.forEach {
+                            selectedIds.add(it.id)
+                        }
+                    })
                 }
             }
+        }, confirmButton = {
+            TextButton(onClick = {
+                tmp.value = false
+            }) {
+                Text("Create")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                tmp.value = false
+            }) {
+                Text("Dismiss")
+            }
+        },
+            modifier = Modifier
+                .requiredHeight(300.dp)
         )
         return tmp.value
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Greeting2(context: Context) {
-        var list2 by remember {
-            mutableStateOf<List<TreatmentModel?>?>(
-                (listOf(
-                    TreatmentModel(
-                        1,
-                        "Загрузка...",
-                        "Загрузка...",
-                        "Загрузка..."
-                    )
-                ))
-            )
-        }
-        val isLoading = remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            treatmentFlow.collect {
-                list2 = it
-            }
-        }
-        val openDialog = remember { mutableStateOf(false) }
-
-        if (openDialog.value) {
-            openDialog.value = Alert()
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { openDialog.value = true },
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            stickyHeader {
-                Text(
-                    text = "Sticky Header",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(22.dp)
-                        .background(Color.Gray),
-                    textAlign = TextAlign.Center
-                )
-                if (isLoading.value) {
-
-                }
-                Crossfade(
-                    targetState = if (isLoading.value) 0f else 1f, animationSpec = spring(
-                        dampingRatio = 2f,
-                        stiffness = Spring.StiffnessMedium
-                    ), label = ""
-                ) { loader ->
-                    // note that it's required to use the value passed by Crossfade
-                    // instead of your state value
-                    if (loader == 1f) {
-                        //isLoading.value = false
-                    } else {
-                        LinearProgressIndicator(Modifier.fillMaxWidth())
-                    }
-                }
-            }
-            if (list2 == null) {
-
-            } else {
-                itemsIndexed(items = list2!!) { pos, _ ->
-                    ListItem(
-                        list2!![pos]?.doctorSurname,
-                        list2!![pos]?.patientSurename,
-                        list2!![pos]?.startdate,
-                        Modifier.animateItemPlacement(
-                            animationSpec = spring(
-                                dampingRatio = 2f,
-                                stiffness = Spring.StiffnessMedium
-                            )
-                        )
-                    )
-                    if ((pos == list2!!.lastIndex) and (list2!!.lastIndex != 0)) {
-                        isLoading.value = false
-                    }
-                }
-            }
-        }
-        Column(
-            modifier = Modifier.padding(all = 10.dp),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Bottom,
-        ) {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    ssm.clearSession()
-                    val activity = (context as? Activity)
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                    activity?.finish()
-                }
-            ) {
-
-            }
-        }
-    }
-
-    @Composable
-    @ExperimentalFoundationApi
-    fun ListItem(
-        doctorSurename: String?,
-        patientSurename: String?,
-        dateOfStart: String?,
-        modifier: Modifier = Modifier
+    fun MultiComboBox(
+        labelText: String,
+        options: List<SymptomDto>?,
+        onOptionsChosen: (List<SymptomDto>?) -> Unit,
+        selectedIds: List<UUID> = emptyList(),
     ) {
-        Surface(
-            elevation = 8.dp,
-            shape = RoundedCornerShape(8.dp),
-            modifier = modifier
-                .height(80.dp)
-                .padding(start = 10.dp, end = 10.dp),
-        ) {
-            Column(
-                modifier = modifier.fillMaxHeight(),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top
-            ) {
-                if (doctorSurename != null) {
-                    Text(
-                        modifier = modifier
-                            .padding(start = 6.dp),
-                        text = doctorSurename,
-                        fontSize = 24.sp
-                    )
-                }
-                if (patientSurename != null) {
-                    Text(
-                        modifier = modifier
-                            .padding(start = 6.dp),
-                        text = patientSurename,
-                        fontSize = 24.sp
-                    )
-                }
-            }
-        }
-        Column(
-            modifier = modifier,
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            if (dateOfStart != null) {
-                Text(
-                    modifier = modifier.fillMaxWidth()
-                        .padding(end = 6.dp),
-                    text = dateOfStart,
-                    fontSize = 24.sp
-                )
-            }
-        }
-    }
+        var expanded by remember { mutableStateOf(false) }
+        // when no options available, I want ComboBox to be disabled
+        val isEnabled by rememberUpdatedState { options?.isNotEmpty() }
+        var selectedOptionsList = remember { mutableStateListOf<UUID>() }
 
-    @Preview(showBackground = true)
-    @Composable
-    fun GreetingPreview2() {
-        TvMedApp_composeTheme {
-            Greeting2(LocalContext.current)
+        //Initial setup of selected ids
+        selectedIds.forEach {
+            selectedOptionsList.add(it)
         }
-    }
 
-    @Preview(showBackground = true)
-    @Composable
-    fun ExpandleCard() {
-        TvMedApp_composeTheme {
-            ExpandableContent(
-                true,
-                TreatmentModel(0, "Ампилогов", "Ампилогов", "12-12-2022 14:12:12 07")
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                if (isEnabled()!!) {
+                    expanded = !expanded
+                    if (!expanded) {
+                        onOptionsChosen(options?.filter { it.id in selectedOptionsList }?.toList())
+                    }
+                }
+            },
+            modifier = Modifier
+                .requiredHeight(30.dp)
+                .padding(top = 30.dp),
+        ) {
+            val selectedSummary = when (selectedOptionsList.size) {
+                0 -> ""
+                1 -> options?.first { it.id == selectedOptionsList.first() }?.symptomsName
+                else -> "Wybrano ${selectedOptionsList.size}"
+            }
+            TextField(
+                enabled = isEnabled()!!,
+                modifier = Modifier.menuAnchor(),
+                readOnly = true,
+                value = selectedSummary!!,
+                onValueChange = {},
+                label = { Text(text = labelText) },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
             )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                    onOptionsChosen(options?.filter { it.id in selectedOptionsList }?.toList())
+                },
+            ) {
+                for (option in options!!) {
+
+                    //use derivedStateOf to evaluate if it is checked
+                    var checked = remember {
+                        derivedStateOf { option.id in selectedOptionsList }
+                    }.value
+
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = checked,
+                                    onCheckedChange = { newCheckedState ->
+                                        if (newCheckedState) {
+                                            selectedOptionsList.add(option.id)
+                                        } else {
+                                            selectedOptionsList.remove(option.id)
+                                        }
+                                    },
+                                )
+                                Text(text = option.symptomsName)
+                            }
+                        },
+                        onClick = {
+                            if (!checked) {
+                                selectedOptionsList.add(option.id)
+                            } else {
+                                selectedOptionsList.remove(option.id)
+                            }
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                    )
+                }
+            }
         }
     }
 }
