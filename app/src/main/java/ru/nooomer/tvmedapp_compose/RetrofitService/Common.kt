@@ -1,9 +1,34 @@
 package ru.nooomer.tvmedapp_compose.RetrofitService
 
-import ru.nooomer.tvmedapp_compose.API
+import android.content.Context
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import ru.nooomer.tvmedapp_compose.BuildConfig
+import ru.nooomer.tvmedapp_compose.api.interfaces.APIAll
 
-object Common {
-    private const val BASE_URL = "http://185.87.48.154:8090/"
-    val retrofitService: API
-        get() = RetrofitClient.getClient(BASE_URL).create(API::class.java)
+class Common(context: Context) {
+    val BASE_URL = BuildConfig.API_FULL_URL
+    var client: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AddCookiesInterceptor(context))
+        .addInterceptor(ReceivedCookiesInterceptor(context))
+        .addInterceptor(AddHeaderInterceptor())
+        .build()
+
+    inline fun <reified T> initRetrofit(): T {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(T::class.java)
+    }
+
+    val retrofitService2: APIAll
+        get() = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(APIAll::class.java)
 }
