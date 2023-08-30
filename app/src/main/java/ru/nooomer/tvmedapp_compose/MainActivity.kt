@@ -8,17 +8,35 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,26 +46,40 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.*
-import kotlinx.coroutines.*
-import ru.nooomer.tvmedapp_compose.RetrofitService.*
-import ru.nooomer.tvmedapp_compose.interfaces.*
-import ru.nooomer.tvmedapp_compose.models.*
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import ru.nooomer.tvmedapp_compose.RetrofitService.SessionManager
+import ru.nooomer.tvmedapp_compose.api.API
+import ru.nooomer.tvmedapp_compose.api.models.AuthDto
+import ru.nooomer.tvmedapp_compose.di.appModule
+import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
+import ru.nooomer.tvmedapp_compose.ui.theme.textFieldColor
 
 private fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
 lateinit var ssm: SessionManager
 private val scope = CoroutineScope(Dispatchers.Main + Job())
-private var result: AuthModel? = null
+private var result: AuthDto? = null
 private var isFailed: Boolean = false
 val phoneErrorSemanticsKey = SemanticsPropertyKey<Boolean>("PhoneErrorSemantics")
 var SemanticsPropertyReceiver.phoneErrorSemantics by phoneErrorSemanticsKey
 
-class MainActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
+class MainActivity : ComponentActivity(), PreferenceDataType {
     private lateinit var mContext: Context
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+        startKoin {
+            androidContext(this@MainActivity)
+            modules(appModule)
+            androidLogger()
+        }
         setContent {
             TvMedApp_composeTheme {
                 Surface(
@@ -57,12 +89,13 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
                     // A surface container using the 'background' color from the theme
                     ssm = SessionManager(this)
                     if (ssm.validation()) {
-                        if ((ssm.fetch(TOKEN_LIFETIME)?.toLong()!! < (ssm.fetch(TOKEN_LIFETIME)
-                                ?.toLong()
-                                ?.plus(60000000000)!!))
-                        ) {
+                        if (((java.util.Date().time - (ssm.fetch(SESSION_TIMEOUT) as String).toLong()) < 604800)) {
                             mContext.startActivity(Intent(mContext, TreatmentActivity::class.java))
                             (mContext as Activity).finish()
+                        }
+                        else{
+                            ssm.clearSession()
+                            LoginWindow(mContext)
                         }
                     }
                     LoginWindow(mContext)
@@ -74,9 +107,8 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
     fun loginClick(loginText: String, passwordText: String, context: Context) {
         if (!ssm.validation() and (loginText != "")) {
             scope.launch {
-                val def = scope.asyncIO { result = auth(loginText, passwordText) }
-                def.await()
-                if ((result?.token == null) or (result == null)) {
+                scope.asyncIO { result = API.login(loginText, passwordText) as AuthDto }.join()
+                if (result == null) {
                     val toast = Toast.makeText(
                         context,
                         "Сломано",
@@ -85,20 +117,20 @@ class MainActivity : ComponentActivity(), PreferenceDataType, RetrofitFun {
                     toast.show()
                     isFailed = true
                 } else {
-                    ssm.save(USER_TOKEN, result?.token)
-                    ssm.save(TOKEN_LIFETIME, System.currentTimeMillis().toString())
-                    ssm.save(USER_TYPE, result?.user_type)
-                    ssm.save(USER_ID, result?.user_id)
+                    ssm.save(LOGIN_STATE, true)
+                    ssm.save(USER_TYPE, result?.userType)
+                    ssm.save(USER_ID, result?.id)
+                    ssm.save(SESSION_TIMEOUT, java.util.Date().time)
                     val toast = Toast.makeText(
                         context,
-                        "Токен сохранен",
+                        "Вход произведен",
                         Toast.LENGTH_SHORT
                     )
                     toast.show()
                     val activity = (context as? Activity)
                     context.startActivity(Intent(context, TreatmentActivity::class.java))
                     activity?.finish()
-                    println(result?.token)
+                    println(result)
                     isFailed = false
                 }
             }
@@ -110,7 +142,6 @@ fun checkValidPhone(s: String): Boolean {
     return !Regex(pattern = "89\\d{9}\$").containsMatchIn(input = s)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginWindow(context: Context) {
     val phone = remember { mutableStateOf("") }
@@ -140,21 +171,7 @@ fun LoginWindow(context: Context) {
                 },
                 textStyle = MaterialTheme.typography.titleLarge,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    errorTextColor = Color.Black,
-                    focusedContainerColor = Color.LightGray,
-                    unfocusedContainerColor = Color.LightGray,
-                    disabledContainerColor = Color.LightGray,
-                    errorContainerColor = Color.LightGray,
-                    errorCursorColor = Color.Red,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorLabelColor = Color.Red,
-                ),
+                colors = textFieldColor!!,
                 label = {
                     Text(
                         stringResource(R.string.phone_number_text),
@@ -242,21 +259,7 @@ fun LoginWindow(context: Context) {
                 },
                 textStyle = MaterialTheme.typography.titleLarge,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    errorTextColor = Color.Black,
-                    focusedContainerColor = Color.LightGray,
-                    unfocusedContainerColor = Color.LightGray,
-                    disabledContainerColor = Color.LightGray,
-                    errorContainerColor = Color.LightGray,
-                    errorCursorColor = Color.Red,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent,
-                    errorLabelColor = Color.Red,
-                ),
+                colors = textFieldColor!!,
                 singleLine = true,
                 enabled = !isLoading.value,
                 label = {

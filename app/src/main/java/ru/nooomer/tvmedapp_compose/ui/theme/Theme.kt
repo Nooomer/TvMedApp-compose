@@ -4,6 +4,8 @@ import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -18,6 +20,7 @@ import androidx.core.view.WindowCompat
 
 val cardCollapsedBackgroundColor = Color(0xFFFEFFFD)
 val cardExpandedBackgroundColor = Color(0xFFFFDA6D)
+public var textFieldColor: TextFieldColors? = null
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -48,6 +51,21 @@ fun TvMedApp_composeTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    textFieldColor = TextFieldDefaults.colors(
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+        errorTextColor = Color.Black,
+        focusedContainerColor = Color.LightGray,
+        unfocusedContainerColor = Color.LightGray,
+        disabledContainerColor = Color.LightGray,
+        errorContainerColor = Color.LightGray,
+        errorCursorColor = Color.Red,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Transparent,
+        errorLabelColor = Color.Red,
+    )
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
