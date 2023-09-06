@@ -154,7 +154,15 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
                 }
             }
         } else {
-            Text("You don't have any treatment")
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "You don't have any treatment",
+                    fontSize = 24.sp
+                )
+            }
         }
     }
 
