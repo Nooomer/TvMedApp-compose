@@ -16,11 +16,11 @@ jobs:
         uses: actions/checkout@v2.4.0
       - name: Setup JDK
         uses: actions/setup-java@v2.5.0
-      - name: Accept Licenses
-        uses: SimonMarquis/android-accept-licenses@v1
         with:
           distribution: temurin
           java-version: "17"
+      - name: Accept Licenses
+        uses: SimonMarquis/android-accept-licenses@v1
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build APK
