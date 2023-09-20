@@ -10,14 +10,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -31,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -86,6 +94,7 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
         }
     }
 }
+
 @Composable
 private fun MessageButtons(
     textValue: MutableState<String>,
@@ -95,10 +104,10 @@ private fun MessageButtons(
     Row(
         modifier
             .background(
-                Color.White,
+                Color.Transparent,
                 shape = MaterialTheme.shapes.small.copy(
-                    bottomEnd = CornerSize(10.dp),
-                    bottomStart = CornerSize(10.dp)
+                    bottomEnd = CornerSize(15.dp),
+                    bottomStart = CornerSize(15.dp)
                 )
             )
             .fillMaxWidth()
@@ -112,11 +121,20 @@ private fun MessageButtons(
             },
             Modifier
                 //.defaultMinSize(minHeight = 100.dp)
-                .height(70.dp)
+                .height(65.dp)
+                .weight(1f)
                 //.requiredHeightIn(min = 130.dp, max = 130.dp)
-                .padding(start = 10.dp, bottom = 10.dp, top = 3.dp),
+                .padding(start = 10.dp, bottom = 10.dp, top = 3.dp, end = 10.dp)
+                .shadow(5.dp),
             colors = textFieldColor!!,
         )
+        ExtendedFloatingActionButton(modifier = Modifier, onClick = {
+
+        }) {
+            Icon(
+                imageVector = Icons.Default.Send, contentDescription = null, tint = Color.Black
+            )
+        }
     }
 }
 
@@ -126,10 +144,20 @@ private fun MessageList(
     paddingValues: PaddingValues,
     messages: List<MessageDto>?
 ) {
+    //val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    /*SideEffect {
+        // Scroll to the bottom when new messages are added
+        coroutineScope.launch {
+            listState.animateScrollToItem(messages?.lastIndex ?: 0)
+        }
+    }*/
     LazyColumn(
         Modifier
             .padding(paddingValues)
             .fillMaxWidth()
+            .fillMaxHeight(),
+        reverseLayout = true// Reverse the layout // Align content to the top
     ) {
         stickyHeader {
             Text(
@@ -160,27 +188,25 @@ private fun MessageBubble(
     val bubleColour = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
+            .wrapContentSize()
+            .padding(5.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = bubleColour,
+                    cornerRadius = CornerRadius(10.dp.toPx())
+                )
+            },
         horizontalArrangement = allignment,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (message.messageText != null) {
-            Text(
-                modifier = Modifier
-                    .widthIn(max = 220.dp)
-                    .drawBehind {
-                        drawRoundRect(
-                            color = bubleColour,
-                            cornerRadius = CornerRadius(10.dp.toPx())
-                        )
-                    }
-                    .padding(6.dp),
-                color = Color.White,
-                text = message.messageText!!,
-                fontSize = 18.sp
-            )
-        }
+        Text(
+            modifier = Modifier
+                .widthIn(max = 220.dp)
+                .padding(6.dp),
+            color = Color.White,
+            text = message.messageText,
+            fontSize = 18.sp
+        )
     }
 }
 
