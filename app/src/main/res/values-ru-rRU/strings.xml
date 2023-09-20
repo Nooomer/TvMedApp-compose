@@ -7,4 +7,6 @@
     <string name="password_text">Пароль</string>
     <string name="login_button_text">Войти</string>
     <string name="title_activity_chat2">Чат обращения</string>
+    <string name="add_new_treatment">Добавить обращение</string>
+    <string name="selected_item">Выбрано %1$s</string>
 </resources>

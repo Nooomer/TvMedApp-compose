@@ -7,5 +7,5 @@
     <string name="login_button_text">Login</string>
     <string name="title_activity_chat2">Treatment Chat</string>
     <string name="add_new_treatment">Add new treatment</string>
-    <string name="selected_item">Выбрано %1$s</string>
+    <string name="selected_item">Choices %1$s</string>
 </resources>
