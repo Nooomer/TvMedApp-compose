@@ -43,12 +43,20 @@ class SessionManager(context: Context) : TSessionManager {
             editor.apply()
         }
 
+    private var clickedTreatmentId: String?
+        get() = prefs.getString(CLICKED_TREATMENT_ID, null)
+        set(value) {
+            editor.putString(CLICKED_TREATMENT_ID, value)
+            editor.apply()
+        }
+
     init {
         if (fetch(LOGIN_STATE) == null) {
             loginState = false
             userId = ""
             userType = ""
             sessionTimeOut = ""
+            clickedTreatmentId =""
         }
     }
 
@@ -62,6 +70,7 @@ class SessionManager(context: Context) : TSessionManager {
             USER_TYPE -> return userType
             USER_ID -> return userId
             SESSION_TIMEOUT -> return sessionTimeOut
+            CLICKED_TREATMENT_ID -> return clickedTreatmentId
         }
         return "Not Found params"
     }
@@ -73,6 +82,7 @@ class SessionManager(context: Context) : TSessionManager {
             USER_TYPE -> userType = data.toString()
             USER_ID -> userId = data.toString()
             SESSION_TIMEOUT -> sessionTimeOut = data.toString()
+            CLICKED_TREATMENT_ID -> clickedTreatmentId = data.toString()
         }
         editor.apply()
     }

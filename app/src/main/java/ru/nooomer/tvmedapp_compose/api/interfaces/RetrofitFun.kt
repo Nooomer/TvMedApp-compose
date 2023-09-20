@@ -10,33 +10,40 @@ import ru.nooomer.tvmedapp_compose.api.models.TreatmentDto
 
 @Deprecated("Old api fun")
 interface RetrofitFun {
-   suspend fun get(funType: String?, table: String?, token: String?, vararg params: String): List<*>? {
+    suspend fun get(
+        funType: String?,
+        table: String?,
+        token: String?,
+        vararg params: String
+    ): List<*>? {
         val common by KoinJavaComponent.inject<Common>(Common::class.java)
-       val mService = common.retrofitService2
+        val mService = common.retrofitService2
         var result2: List<TreatmentDto?>?
-       var result3: List<MessageDto?>?
+        var result3: List<MessageDto?>?
 
         when (funType) {
             "all" -> {
-                when(table){
-                    "treatment" ->{
+                when (table) {
+                    "treatment" -> {
                         val call = mService.getAllTreatment("treatment", token)
-                        result2 =  call?.execute()?.body()
+                        result2 = call?.execute()?.body()
                         return result2
                     }
-                    "messages" ->{
+
+                    "messages" -> {
                         val call = mService.getAllMessages(params[0], token)
-                        result3 =  call?.execute()?.body()
+                        result3 = call?.execute()?.body()
                         return result3
                     }
                 }
 
             }
-            "filtered" ->{
-                when(table){
-                    "treatment" ->{
+
+            "filtered" -> {
+                when (table) {
+                    "treatment" -> {
                         val call = mService.getTreatmentFromPatientId("treatment", params[0], token)
-                        result2 =  call?.execute()?.body()
+                        result2 = call?.execute()?.body()
                         return result2
                     }
                 }
@@ -52,11 +59,10 @@ interface RetrofitFun {
         var result: AuthDto? = null
         var result2: List<TreatmentDto?>?
         val call = mService.auth("login", LoginData(login, password))
-        ex_call =  call?.execute()
-        if(ex_call?.code()!=401){
+        ex_call = call?.execute()
+        if (ex_call?.code() != 401) {
             result = ex_call?.body()
-        }
-        else{
+        } else {
             return null
         }
 

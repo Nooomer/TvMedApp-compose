@@ -13,4 +13,6 @@ interface PreferenceDataType {
         get() = "user_type"
     val USER_ID: String
         get() = "user_id"
+    val CLICKED_TREATMENT_ID: String
+        get() = "clicked_treatment_id"
 }

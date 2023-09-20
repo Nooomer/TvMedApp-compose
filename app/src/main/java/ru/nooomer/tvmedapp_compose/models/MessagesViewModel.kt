@@ -8,9 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.nooomer.tvmedapp_compose.api.models.MessageDto
+import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
+import ru.nooomer.tvmedapp_compose.ssm
+import java.util.UUID
 
-class MessagesViewModel : ViewModel() {
-    val messagesFlow = MessagesModelView().messagesFlow
+class MessagesViewModel() : ViewModel(), PreferenceDataType {
+    private val treatmentId: UUID = UUID.fromString(ssm.fetch(CLICKED_TREATMENT_ID).toString())
+    private val messagesFlow = MessagesModelView(treatmentId).messagesFlow
 
 
     private val _messages = MutableStateFlow(listOf<MessageDto>())
@@ -20,17 +24,17 @@ class MessagesViewModel : ViewModel() {
     val expandedMessagesIdsList: StateFlow<List<Int>?> get() = _expandedMessagesIdsList
 
     init {
-        getFakeData()
+        getData()
     }
 
-    private fun getFakeData() {
+    private fun getData() {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
-                var testList: List<MessageDto>? = null
+                var messagesList: List<MessageDto>? = null
                 messagesFlow.collect {
-                       testList = it
+                       messagesList = it
                 }
-                _messages.emit(testList!!)
+                _messages.emit(messagesList!!)
             }
         }
     }
