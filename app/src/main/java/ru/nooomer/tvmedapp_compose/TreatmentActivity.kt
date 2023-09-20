@@ -82,7 +82,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
     private fun AddNewTreatmentButton() {
         var alertDialog = remember { mutableStateOf(false) }
         Column(
-            modifier = Modifier.padding(all = 10.dp),
+            modifier = Modifier,
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom,
         ) {
@@ -230,7 +230,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
                     CardArrow(
                         degrees = arrowRotationDegree, onClick = onCardArrowClick
                     )
-                    ChatButton(Modifier.align(Alignment.CenterEnd))
+                    ChatButton(Modifier.align(Alignment.CenterEnd), card.id)
                 }
                 ExpandableContent(visible = expanded, card)
             }
@@ -238,8 +238,9 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
     }
 
     @Composable
-    private fun ChatButton(modifier: Modifier) {
+    private fun ChatButton(modifier: Modifier, treatmentId: UUID) {
         IconButton(modifier = modifier, onClick = {
+            ssm.save(CLICKED_TREATMENT_ID, treatmentId)
             this.startActivity(
                 Intent(
                     this, ChatActivity::class.java
@@ -337,15 +338,12 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
         val symptoms by symptomViewModel.symptoms.collectAsStateWithLifecycle()
         var selectedIds: MutableSet<UUID> = mutableSetOf()
         AlertDialog(onDismissRequest = {
-            // Dismiss the dialog when the user clicks outside the dialog or on the back
-            // button. If you want to disable that functionality, simply use an empty
-            // onDismissRequest.
             tmp.value = false
         }, title = {
             Text(text = stringResource(R.string.add_new_treatment))
         }, text = {
             Column(
-                modifier = Modifier.requiredHeight(60.dp)
+                modifier = Modifier
             ) {
                 Text(text = "Choose you symptom")
                 if (!symptoms?.isEmpty()!!) {
@@ -370,7 +368,6 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
             }
         },
             modifier = Modifier
-                .requiredHeight(300.dp)
         )
         return tmp.value
     }
@@ -404,7 +401,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
                 }
             },
             modifier = Modifier
-                .requiredHeight(30.dp)
+                .requiredHeight(150.dp)
                 .padding(top = 30.dp),
         ) {
             val selectedSummary = when (selectedOptionsList.size) {
