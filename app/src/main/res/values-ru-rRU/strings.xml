@@ -9,4 +9,14 @@
     <string name="title_activity_chat2">Чат обращения</string>
     <string name="add_new_treatment">Добавить обращение</string>
     <string name="selected_item">Выбрано %1$s</string>
+    <string name="an_error_occurred_try_again_later">Произошла какая-то ошибка. Попробуйте еще раз.</string>
+    <string name="you_don_t_have_any_treatment">У вас нет доступных обращений</string>
+    <string name="patient">Пациент: %1$s</string>
+    <string name="doctor">Врач: %1$s</string>
+    <string name="created_date">Создано: %1$s</string>
+    <string name="choose_you_symptom">Выберите ваши симптомы</string>
+    <string name="choose_symptoms">Выбраны симптомы</string>
+    <string name="create">Создать</string>
+    <string name="dismiss">Отменить</string>
+    <string name="choose">Выбраны %1$</string>
 </resources>

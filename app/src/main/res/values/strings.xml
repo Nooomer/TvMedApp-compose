@@ -8,4 +8,14 @@
     <string name="title_activity_chat2">Treatment Chat</string>
     <string name="add_new_treatment">Add new treatment</string>
     <string name="selected_item">Choices %1$s</string>
+    <string name="an_error_occurred_try_again_later">An error occurred. Try again later.</string>
+    <string name="you_don_t_have_any_treatment">You don\'t have any treatment</string>
+    <string name="patient">Patient: %1$s</string>
+    <string name="doctor">Doctor: %1$s</string>
+    <string name="created_date">Created date: %1$s</string>
+    <string name="choose_you_symptom">Choose you symptom</string>
+    <string name="choose_symptoms">Choose symptoms</string>
+    <string name="create">Create</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="choose">Choose %1$s</string>
 </resources>
