@@ -8,8 +8,9 @@ import ru.nooomer.tvmedapp_compose.api.models.MessageDto
 import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 import java.util.UUID
 
-class MessagesModelView(treatmentId: UUID): ViewModel(), PreferenceDataType {
-    val messagesFlow: Flow<List<MessageDto>?> = flow{
-        emit(API.getChat(treatmentId)?.messages?.toMutableList())
-        }
-    }
+class MessagesModelView(treatmentId: UUID) : ViewModel(),
+	PreferenceDataType {
+	val messagesFlow: Flow<List<MessageDto>?> = flow {
+		emit(API.getChat(treatmentId)?.messages?.toMutableList())
+	}
+}

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
@@ -45,10 +44,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import ru.nooomer.tvmedapp_compose.api.API
 import ru.nooomer.tvmedapp_compose.api.models.MessageDto
+import ru.nooomer.tvmedapp_compose.api.models.NewMessageDto
 import ru.nooomer.tvmedapp_compose.models.MessagesViewModel
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 import ru.nooomer.tvmedapp_compose.ui.theme.textFieldColor
+import java.util.UUID
 
 class ChatActivity : ComponentActivity() {
 	private val messagesViewModel by viewModels<MessagesViewModel>()
@@ -82,10 +89,10 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
 		Column(
 			Modifier
 				.fillMaxSize()
-				.padding(bottom = 50.dp)
+				.padding(bottom = 70.dp)
 		) {
 			MessageList(paddingValues, messages)
-			MessageButtons(textValue, textChanged)
+			MessageButtons(textValue, textChanged, viewModel)
 		}
 	}
 }
@@ -94,7 +101,10 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
 private fun MessageButtons(
 	textValue: MutableState<String>,
 	textChanged: MutableState<Boolean>,
+	messagesViewModel: MessagesViewModel
 ) {
+	fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
+	val scope = CoroutineScope(Dispatchers.Main + Job())
 	Row(
 		Modifier
 			.background(
@@ -105,7 +115,7 @@ private fun MessageButtons(
 				)
 			)
 			.fillMaxWidth()
-			.padding(start = 10.dp, bottom = 6.dp, end = 10.dp, top = 25.dp)
+			.padding(start = 10.dp, bottom = 6.dp, end = 10.dp, top = 30.dp)
 			.requiredHeight(70.dp),
 		horizontalArrangement = Arrangement.Start,
 		verticalAlignment = Alignment.CenterVertically
@@ -130,7 +140,15 @@ private fun MessageButtons(
 			),
 		)
 		ExtendedFloatingActionButton(modifier = Modifier, onClick = {
-
+			scope.launch {
+				scope.asyncIO {
+					API.sendMessage(
+						UUID.fromString(ssm.fetch(ssm.CLICKED_TREATMENT_ID).toString()),
+						NewMessageDto(textValue.value)
+					)
+				}.join()
+				messagesViewModel.getData()
+			}
 		}) {
 			Icon(
 				imageVector = Icons.Default.Send, contentDescription = null, tint = Color.Black
@@ -173,21 +191,21 @@ private fun MessageBubble(
 	val bubleColour = MaterialTheme.colorScheme.primary
 	Row(
 		modifier = Modifier
-			.wrapContentSize()
-			.padding(5.dp)
-			.drawBehind {
-				drawRoundRect(
-					color = bubleColour,
-					cornerRadius = CornerRadius(10.dp.toPx())
-				)
-			},
+			.fillMaxWidth()
+			.padding(5.dp),
 		horizontalArrangement = allignment,
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		Text(
 			modifier = Modifier
 				.widthIn(max = 220.dp)
-				.padding(6.dp),
+				.padding(6.dp)
+				.drawBehind {
+					drawRoundRect(
+						color = bubleColour,
+						cornerRadius = CornerRadius(10.dp.toPx()),
+					)
+				},
 			color = Color.White,
 			text = message.messageText,
 			fontSize = 18.sp
