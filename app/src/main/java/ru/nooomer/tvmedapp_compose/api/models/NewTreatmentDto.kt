@@ -1,5 +1,8 @@
 package ru.nooomer.tvmedapp_compose.api.models
 
+import java.util.UUID
+
 data class NewTreatmentDto(
-    var symptom: MutableSet<SymptomDto>,
+	var patient: UserDto? = null,
+	var symptomIds: MutableSet<UUID>,
 )

@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +52,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import ru.nooomer.tvmedapp_compose.api.API
+import ru.nooomer.tvmedapp_compose.api.API.justExecute
 import ru.nooomer.tvmedapp_compose.api.models.MessageDto
 import ru.nooomer.tvmedapp_compose.api.models.NewMessageDto
 import ru.nooomer.tvmedapp_compose.models.MessagesViewModel
@@ -91,8 +94,14 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
 				.fillMaxSize()
 				.padding(bottom = 70.dp)
 		) {
-			MessageList(paddingValues, messages)
-			MessageButtons(textValue, textChanged, viewModel)
+			if (!messages.isNullOrEmpty()) {
+				MessageList(paddingValues, messages)
+				MessageButtons(textValue, textChanged, viewModel)
+			} else {
+				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+					Text(stringResource(R.string.there_are_no_messages_in_this_chat_yet))
+				}
+			}
 		}
 	}
 }
@@ -145,7 +154,7 @@ private fun MessageButtons(
 					API.sendMessage(
 						UUID.fromString(ssm.fetch(ssm.CLICKED_TREATMENT_ID).toString()),
 						NewMessageDto(textValue.value)
-					)
+					).justExecute()
 				}.join()
 				messagesViewModel.getData()
 			}

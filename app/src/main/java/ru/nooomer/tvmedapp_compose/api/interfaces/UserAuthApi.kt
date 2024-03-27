@@ -7,15 +7,31 @@ import retrofit2.http.POST
 import ru.nooomer.tvmedapp_compose.api.models.AuthDto
 import ru.nooomer.tvmedapp_compose.api.models.LoginData
 
+/**
+ *Интерфейс для доступа до АПИ методов
+ */
 interface UserAuthApi {
-    @POST("user/login")
-    fun login(
-        @Body body: LoginData?
-    ): Call<AuthDto>
+	/**
+	 * Post метоод для входа.
+	 * @param body тело запроса в формате [LoginData]
+	 * @return [Call] типа [AuthDto]
+	 */
+	@POST("user/login")
+	fun login(
+		@Body body: LoginData?
+	): Call<AuthDto>
 
-    @GET("user/login")
-    fun checkLogin(): Call<Boolean>
+	/**
+	 * Метод для проверки текущего статуса входа
+	 * @return [Call] типа [Boolean]
+	 */
+	@GET("user/login")
+	fun checkLogin(): Call<Boolean>
 
-    @GET("user/logout")
-    fun logout():Call<Void>
+	/**
+	 * Метод для выхода из аккаунта
+	 * @return [Call] типа [Void]
+	 */
+	@GET("user/logout")
+	fun logout(): Call<Void>
 }

@@ -62,255 +62,280 @@ import ru.nooomer.tvmedapp_compose.di.appModule
 import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 import ru.nooomer.tvmedapp_compose.ui.theme.textFieldColor
+import java.util.Date
 
 private fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
-lateinit var ssm: SessionManager
 private val scope = CoroutineScope(Dispatchers.Main + Job())
+lateinit var ssm: SessionManager
 private var result: AuthDto? = null
 private var isFailed: Boolean = false
 val phoneErrorSemanticsKey = SemanticsPropertyKey<Boolean>("PhoneErrorSemantics")
 var SemanticsPropertyReceiver.phoneErrorSemantics by phoneErrorSemanticsKey
 
 class MainActivity : ComponentActivity(), PreferenceDataType {
-    private lateinit var mContext: Context
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        startKoin {
-            androidContext(this@MainActivity)
-            modules(appModule)
-            androidLogger()
-        }
-        setContent {
-            TvMedApp_composeTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    mContext = LocalContext.current
-                    // A surface container using the 'background' color from the theme
-                    ssm = SessionManager(this)
-                    if (ssm.validation()) {
-                        if (((java.util.Date().time - (ssm.fetch(SESSION_TIMEOUT) as String).toLong()) < 604800)) {
-                            mContext.startActivity(Intent(mContext, TreatmentActivity::class.java))
-                            (mContext as Activity).finish()
-                        }
-                        else{
-                            ssm.clearSession()
-                            LoginWindow(mContext)
-                        }
-                    }
-                    LoginWindow(mContext)
-                }
-            }
-        }
-    }
+	private lateinit var mContext: Context
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		startKoin {
+			androidContext(this@MainActivity)
+			modules(appModule)
+			androidLogger()
+		}
+		setContent {
+			TvMedApp_composeTheme {
+				Surface(
+					modifier = Modifier.fillMaxSize(),
+				) {
+					mContext = LocalContext.current
+					ssm = SessionManager(this)
+					with(ssm) {
+						if (validation()) {
+							if (checkTimeOut()) {
+								with(mContext) {
+									startActivity(
+										Intent(
+											this, TreatmentActivity::class.java
+										)
+									)
+									(this as Activity).finish()
+								}
+							} else {
+								clearSession()
+								LoginWindow(mContext)
+							}
+						}
+					}
+					LoginWindow(mContext)
+				}
+			}
+		}
+	}
 
-    fun loginClick(loginText: String, passwordText: String, context: Context) {
-        if (!ssm.validation() and (loginText != "")) {
-            scope.launch {
-                scope.asyncIO { result = API.login(loginText, passwordText) as AuthDto }.join()
-                if (result == null) {
-                    val toast = Toast.makeText(
-                        context,
-                        "Сломано",
-                        Toast.LENGTH_SHORT
-                    )
-                    toast.show()
-                    isFailed = true
-                } else {
-                    ssm.save(LOGIN_STATE, true)
-                    ssm.save(USER_TYPE, result?.userType)
-                    ssm.save(USER_ID, result?.id)
-                    ssm.save(SESSION_TIMEOUT, java.util.Date().time)
-                    val toast = Toast.makeText(
-                        context,
-                        "Вход произведен",
-                        Toast.LENGTH_SHORT
-                    )
-                    toast.show()
-                    val activity = (context as? Activity)
-                    context.startActivity(Intent(context, TreatmentActivity::class.java))
-                    activity?.finish()
-                    println(result)
-                    isFailed = false
-                }
-            }
-        }
-    }
+	private fun checkTimeOut() =
+		(Date().time - (ssm.fetch(SESSION_TIMEOUT) as String).toLong()) < 604800
+
+	fun loginClick(loginText: String, passwordText: String, context: Context) {
+		if (!ssm.validation() and (loginText != "")) {
+			scope.launch {
+				scope.asyncIO { result = API.login(loginText, passwordText) as AuthDto }.join()
+				when (result) {
+					null -> {
+						val toast = Toast.makeText(
+							context,
+							getString(R.string.an_error_occurred_try_again_later),
+							Toast.LENGTH_SHORT
+						)
+						toast.show()
+						isFailed = true
+					}
+
+					else -> {
+						with(ssm) {
+							with(result) {
+								save(LOGIN_STATE, true)
+								save(USER_TYPE, this?.userType)
+								save(USER_ID, this?.id)
+								save(SESSION_TIMEOUT, Date().time)
+							}
+						}
+						val toast = Toast.makeText(
+							context,
+							context.getString(R.string.login_ok),
+							Toast.LENGTH_SHORT
+						)
+						toast.show()
+						with(context) {
+							startActivity(
+								Intent(
+									this,
+									TreatmentActivity::class.java
+								)
+							)
+							(this as Activity).finish()
+						}
+						isFailed = false
+					}
+				}
+			}
+		}
+	}
 }
 
-fun checkValidPhone(s: String): Boolean {
-    return !Regex(pattern = "89\\d{9}\$").containsMatchIn(input = s)
-}
+fun checkValidPhone(s: String) = !Regex(pattern = "89\\d{9}\$").containsMatchIn(input = s)
 
 @Composable
 fun LoginWindow(context: Context) {
-    val phone = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
-    val buttonEnable = remember { mutableStateOf(false) }
-    val phoneError = remember { mutableStateOf(false) }
-    val labelColor = remember { mutableStateOf(Color.Black) }
-    val firstLoading = remember { mutableStateOf(true) }
-    val isLoading = remember { mutableStateOf(false) }
-    val valueCounter = remember { mutableStateOf(0) }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    )
-    {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxWidth().padding(5.dp)
-        )
-        {
-            TextField(
-                phone.value,
-                {
-                    phone.value = it
-                    buttonEnable.value = (password.value != "") and (phone.value != "")
-                    valueCounter.value = it.length
-                },
-                textStyle = MaterialTheme.typography.titleLarge,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = textFieldColor!!,
-                label = {
-                    Text(
-                        stringResource(R.string.phone_number_text),
-                        color = labelColor.value
-                    )
-                },
-                trailingIcon = {
-                    Crossfade(
-                        targetState = if (phoneError.value) 1f else 0f, animationSpec = spring(
-                            dampingRatio = 2f,
-                            stiffness = Spring.StiffnessMedium
-                        ), label = ""
-                    ) { phoneError ->
-                        if (phoneError == 1f) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = null,
-                                tint = Color.Red
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Outlined.Phone,
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
-                        }
-                    }
-                },
-                singleLine = true,
-                enabled = !isLoading.value,
-                shape = MaterialTheme.shapes.small.copy(
-                    bottomEnd = CornerSize(10.dp),
-                    bottomStart = CornerSize(10.dp)
-                ),
-                modifier = Modifier
-                    .semantics {
-                        phoneErrorSemantics = phoneError.value
-                    }
-                    .height(70.dp)
-                    .onFocusEvent { focusState ->
-                        when {
-                            (!focusState.isFocused and !firstLoading.value) and (valueCounter.value < 11) -> {
-                                if (checkValidPhone(phone.value)) {
-                                    phoneError.value = true
-                                    buttonEnable.value = false
-                                    labelColor.value = Color.Red
-                                } else {
-                                    if ((password.value == "") or (phone.value.length != 11)) {
-                                        phoneError.value = false
-                                        buttonEnable.value = false
-                                        labelColor.value = Color.Black
-                                    } else {
-                                        phoneError.value = false
-                                        buttonEnable.value = true
-                                        labelColor.value = Color.Black
-                                    }
-                                }
-                            }
+	val phone = remember { mutableStateOf("") }
+	val password = remember { mutableStateOf("") }
+	val buttonEnable = remember { mutableStateOf(false) }
+	val phoneError = remember { mutableStateOf(false) }
+	val labelColor = remember { mutableStateOf(Color.Black) }
+	val firstLoading = remember { mutableStateOf(true) }
+	val isLoading = remember { mutableStateOf(false) }
+	val valueCounter = remember { mutableStateOf(0) }
+	Column(
+		modifier = Modifier.fillMaxSize(),
+		verticalArrangement = Arrangement.Center
+	)
+	{
+		Box(
+			contentAlignment = Alignment.Center,
+			modifier = Modifier.fillMaxWidth().padding(5.dp)
+		)
+		{
+			TextField(
+				phone.value,
+				{
+					phone.value = it
+					buttonEnable.value = (password.value != "") and (phone.value != "")
+					valueCounter.value = it.length
+				},
+				textStyle = MaterialTheme.typography.titleLarge,
+				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+				colors = textFieldColor!!,
+				label = {
+					Text(
+						stringResource(R.string.phone_number_text),
+						color = labelColor.value
+					)
+				},
+				trailingIcon = {
+					Crossfade(
+						targetState = if (phoneError.value) 1f else 0f, animationSpec = spring(
+							dampingRatio = 2f,
+							stiffness = Spring.StiffnessMedium
+						), label = ""
+					) { phoneError ->
+						if (phoneError == 1f) {
+							Icon(
+								imageVector = Icons.Outlined.Close,
+								contentDescription = null,
+								tint = Color.Red
+							)
+						} else {
+							Icon(
+								imageVector = Icons.Outlined.Phone,
+								contentDescription = null,
+								tint = Color.Black
+							)
+						}
+					}
+				},
+				singleLine = true,
+				enabled = !isLoading.value,
+				shape = MaterialTheme.shapes.small.copy(
+					bottomEnd = CornerSize(10.dp),
+					bottomStart = CornerSize(10.dp)
+				),
+				modifier = Modifier
+					.semantics {
+						phoneErrorSemantics = phoneError.value
+					}
+					.height(70.dp)
+					.onFocusEvent { focusState ->
+						when {
+							(!focusState.isFocused and !firstLoading.value) and (valueCounter.value < 11) -> {
+								if (checkValidPhone(phone.value)) {
+									phoneError.value = true
+									buttonEnable.value = false
+									labelColor.value = Color.Red
+								} else {
+									if ((password.value == "") or (phone.value.length != 11)) {
+										phoneError.value = false
+										buttonEnable.value = false
+										labelColor.value = Color.Black
+									} else {
+										phoneError.value = false
+										buttonEnable.value = true
+										labelColor.value = Color.Black
+									}
+								}
+							}
 
-                            else -> {
-                                firstLoading.value = false
-                                phoneError.value = false
-                                labelColor.value = Color.Black
-                            }
-                        }
-                    },
-                isError = phoneError.value
-            )
+							else -> {
+								firstLoading.value = false
+								phoneError.value = false
+								labelColor.value = Color.Black
+							}
+						}
+					},
+				isError = phoneError.value
+			)
 
-        }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxWidth().padding(5.dp)
-        )
-        {
-            TextField(
-                password.value,
-                {
-                    password.value = it
-                    buttonEnable.value =
-                        (password.value != "") and ((phone.value != "") or (!phoneError.value) or (phone.value.length == 11))
-                },
-                visualTransformation = {
-                    PasswordVisualTransformation().filter(it)
-                },
-                textStyle = MaterialTheme.typography.titleLarge,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = textFieldColor!!,
-                singleLine = true,
-                enabled = !isLoading.value,
-                label = {
-                    Text(
-                        stringResource(R.string.password_text),
-                        color = Color.Black
-                    )
-                },
-                shape = MaterialTheme.shapes.small.copy(
-                    bottomEnd = CornerSize(10.dp),
-                    bottomStart = CornerSize(10.dp)
-                ),
-                modifier = Modifier.height(70.dp),
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
-                        contentDescription = null,
-                        tint = Color.Black
-                    )
-                },
-            )
+		}
+		Box(
+			contentAlignment = Alignment.Center,
+			modifier = Modifier.fillMaxWidth().padding(5.dp)
+		)
+		{
+			TextField(
+				password.value,
+				{
+					password.value = it
+					buttonEnable.value =
+						(password.value != "") and ((phone.value != "") or (!phoneError.value) or (phone.value.length == 11))
+				},
+				visualTransformation = {
+					PasswordVisualTransformation().filter(it)
+				},
+				textStyle = MaterialTheme.typography.titleLarge,
+				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+				colors = textFieldColor!!,
+				singleLine = true,
+				enabled = !isLoading.value,
+				label = {
+					Text(
+						stringResource(R.string.password_text),
+						color = Color.Black
+					)
+				},
+				shape = MaterialTheme.shapes.small.copy(
+					bottomEnd = CornerSize(10.dp),
+					bottomStart = CornerSize(10.dp)
+				),
+				modifier = Modifier.height(70.dp),
+				trailingIcon = {
+					Icon(
+						imageVector = Icons.Outlined.Lock,
+						contentDescription = null,
+						tint = Color.Black
+					)
+				},
+			)
 
-        }
-        Button(
-            enabled = buttonEnable.value and !phoneError.value and ((phone.value != "") or (!phoneError.value) or (phone.value.length == 11)),
-            modifier = Modifier.width(300.dp).padding(all = 10.dp)
-                .align(Alignment.CenterHorizontally), onClick = {
-                MainActivity().loginClick(phone.value, password.value, context)
-                isLoading.value = true
-            }) {
-            if (isLoading.value) {
-                CircularProgressIndicator(
-                    Modifier
-                        .size(15.dp)
-                        .align(Alignment.CenterVertically),
-                    strokeWidth = 1.dp
-                )
-                Text(stringResource(R.string.login_button_text))
-                isLoading.value = isFailed
-            } else {
-                isLoading.value = false
-                Text(stringResource(R.string.login_button_text))
-            }
-        }
-    }
+		}
+		Button(
+			enabled = buttonEnable.value and !phoneError.value and ((phone.value != "") or (!phoneError.value) or (phone.value.length == 11)),
+			modifier = Modifier
+				.width(300.dp)
+				.padding(all = 10.dp)
+				.align(Alignment.CenterHorizontally),
+			onClick = {
+				MainActivity()
+					.loginClick(phone.value, password.value, context)
+				isLoading.value = true
+			}) {
+			if (isLoading.value) {
+				CircularProgressIndicator(
+					Modifier
+						.size(15.dp)
+						.align(Alignment.CenterVertically),
+					strokeWidth = 1.dp
+				)
+				Text(stringResource(R.string.login_button_text))
+				isLoading.value = isFailed
+			} else {
+				isLoading.value = false
+				Text(stringResource(R.string.login_button_text))
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LoginWindowPreview() {
-    TvMedApp_composeTheme {
-        LoginWindow(LocalContext.current)
-    }
+	TvMedApp_composeTheme {
+		LoginWindow(LocalContext.current)
+	}
 }

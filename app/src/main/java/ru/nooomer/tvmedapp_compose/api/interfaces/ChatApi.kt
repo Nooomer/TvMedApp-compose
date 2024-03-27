@@ -9,6 +9,10 @@ import ru.nooomer.tvmedapp_compose.api.models.ChatDto
 import ru.nooomer.tvmedapp_compose.api.models.NewMessageDto
 import java.util.UUID
 
+/**
+ *Интерфейс для доступа до АПИ методов
+ */
+
 interface ChatApi {
 	@GET("treatment/chat/{treatment-id}")
 	fun getChat(@Path("treatment-id") treatmentId: UUID?): Call<ChatDto>

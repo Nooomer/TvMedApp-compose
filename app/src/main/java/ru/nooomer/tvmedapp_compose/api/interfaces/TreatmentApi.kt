@@ -7,10 +7,13 @@ import retrofit2.http.POST
 import ru.nooomer.tvmedapp_compose.api.models.NewTreatmentDto
 import ru.nooomer.tvmedapp_compose.api.models.TreatmentDto
 
+/**
+ *Интерфейс для доступа до АПИ методов
+ */
 interface TreatmentApi {
-    @GET("treatment")
-    fun getTreatment(): Call<List<TreatmentDto>>
+	@GET("treatment")
+	fun getTreatment(): Call<List<TreatmentDto>>
 
-    @POST("treatment")
-    fun addTreatment(@Body treatmentDto: NewTreatmentDto): Call<List<TreatmentDto>>
+	@POST("treatment")
+	fun addTreatment(@Body treatmentDto: NewTreatmentDto): Call<List<TreatmentDto>>
 }

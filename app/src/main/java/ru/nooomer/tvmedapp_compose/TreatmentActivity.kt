@@ -2,6 +2,7 @@ package ru.nooomer.tvmedapp_compose
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,12 +23,12 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,14 +73,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import ru.nooomer.tvmedapp_compose.RetrofitService.SessionManager
+import ru.nooomer.tvmedapp_compose.api.API
+import ru.nooomer.tvmedapp_compose.api.API.justExecute
+import ru.nooomer.tvmedapp_compose.api.models.NewTreatmentDto
 import ru.nooomer.tvmedapp_compose.api.models.SymptomDto
 import ru.nooomer.tvmedapp_compose.api.models.TreatmentDto
 import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
-import ru.nooomer.tvmedapp_compose.models.CardsViewModel
 import ru.nooomer.tvmedapp_compose.models.SymptomViewModel
-import ru.nooomer.tvmedapp_compose.models.TreatmentModelView
+import ru.nooomer.tvmedapp_compose.models.TreatmentViewModel
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 import ru.nooomer.tvmedapp_compose.ui.theme.cardCollapsedBackgroundColor
 import ru.nooomer.tvmedapp_compose.ui.theme.cardExpandedBackgroundColor
@@ -88,29 +96,30 @@ import java.util.UUID
 var data = mutableListOf<MutableList<String?>>()
 
 class TreatmentActivity : ComponentActivity(), PreferenceDataType {
-	private val cardsViewModel by viewModels<CardsViewModel>()
+	private val treatmentViewModel by viewModels<TreatmentViewModel>()
 	private val symptomViewModel by viewModels<SymptomViewModel>()
 	private val ssm by inject<SessionManager>()
-	private val treatmentFlow = TreatmentModelView().treatmentFlow
+	private lateinit var mContext: Context
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
 			TvMedApp_composeTheme {
+				mContext = LocalContext.current
 				// A surface container using the 'background' color from the theme
 				Surface(
 					modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
 				) { // the key define when the block is relaunched // Your coroutine code her
-					CardsScreen(cardsViewModel)
+					CardsScreen(treatmentViewModel)
 					LogoutButton()
-					AddNewTreatmentButton()
+					AddNewTreatmentButton(mContext, treatmentViewModel)
 				}
 			}
 		}
 	}
 
 	@Composable
-	private fun AddNewTreatmentButton() {
-		var alertDialog = remember { mutableStateOf(false) }
+	private fun AddNewTreatmentButton(context: Context, treatmentViewModel: TreatmentViewModel) {
+		val alertDialog = remember { mutableStateOf(false) }
 		Column(
 			modifier = Modifier
 				.padding(10.dp),
@@ -126,7 +135,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 			}
 		}
 		if (alertDialog.value) {
-			alertDialog.value = Alert()
+			alertDialog.value = Alert(context, treatmentViewModel)
 		}
 	}
 
@@ -158,22 +167,14 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 
 	@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 	@Composable
-	fun CardsScreen(viewModel: CardsViewModel) {
+	fun CardsScreen(viewModel: TreatmentViewModel) {
 		val cards by viewModel.cards.collectAsStateWithLifecycle()
 		val expandedCardIds by viewModel.expandedCardIdsList.collectAsStateWithLifecycle()
 		val error = remember { mutableStateOf(false) }
 		if (cards!!.isNotEmpty()) {
 			Scaffold { paddingValues ->
 				if (!error.value) {
-					LazyColumn(Modifier.padding(paddingValues)) {
-						items(cards!!, TreatmentDto::id) { card ->
-							ExpandableCard(
-								card = card,
-								onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
-								expanded = expandedCardIds!!.contains(card.id),
-							)
-						}
-					}
+					TreatmentList(paddingValues, cards, viewModel, expandedCardIds)
 				} else {
 					Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 						Text(stringResource(R.string.an_error_occurred_try_again_later))
@@ -188,6 +189,24 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 				Text(
 					text = stringResource(R.string.you_don_t_have_any_treatment),
 					fontSize = 24.sp
+				)
+			}
+		}
+	}
+
+	@Composable
+	private fun TreatmentList(
+		paddingValues: PaddingValues,
+		cards: List<TreatmentDto>?,
+		viewModel: TreatmentViewModel,
+		expandedCardIds: List<UUID>?
+	) {
+		LazyColumn(Modifier.padding(paddingValues)) {
+			items(cards!!, TreatmentDto::id) { card ->
+				ExpandableCard(
+					card = card,
+					onCardArrowClick = { viewModel.onCardArrowClicked(card.id) },
+					expanded = expandedCardIds!!.contains(card.id),
 				)
 			}
 		}
@@ -293,13 +312,11 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 	}
 
 	@Composable
-	fun CardTitle(title: String) {
-		Text(
-			text = title,
-			modifier = Modifier.fillMaxWidth().padding(16.dp),
-			textAlign = TextAlign.Center,
-		)
-	}
+	fun CardTitle(title: String) = Text(
+		text = title,
+		modifier = Modifier.fillMaxWidth().padding(16.dp),
+		textAlign = TextAlign.Center,
+	)
 
 	@Composable
 	fun ExpandableContent(
@@ -360,7 +377,9 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 	}
 
 	@Composable
-	fun Alert(): Boolean {
+	fun Alert(context: Context, treatmentViewModel: TreatmentViewModel): Boolean {
+		fun <T> CoroutineScope.asyncIO(ioFun: () -> T) = async(Dispatchers.IO) { ioFun() }
+		val scope = CoroutineScope(Dispatchers.Main + Job())
 		val tmp = remember { mutableStateOf(true) }
 		val symptoms by symptomViewModel.symptoms.collectAsStateWithLifecycle()
 		var selectedIds: MutableSet<UUID> = mutableSetOf()
@@ -387,6 +406,13 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 		}, confirmButton = {
 			TextButton(onClick = {
 				tmp.value = false
+				scope.launch {
+					scope.asyncIO {
+						API.addNewTreatment(NewTreatmentDto(null, selectedIds))
+							.justExecute()
+					}.join()
+					treatmentViewModel.getTreatmentData()
+				}
 			}) {
 				Text(stringResource(R.string.create))
 			}
@@ -431,7 +457,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 				}
 			},
 			modifier = Modifier
-				.requiredHeight(150.dp)
+				//.requiredHeight(150.dp)
 				.padding(top = 30.dp),
 		) {
 			val selectedSummary = when (selectedOptionsList.size) {

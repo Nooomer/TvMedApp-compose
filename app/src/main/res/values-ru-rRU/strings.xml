@@ -19,4 +19,6 @@
     <string name="create">Создать</string>
     <string name="dismiss">Отменить</string>
     <string name="choose">Выбраны %1$</string>
+    <string name="there_are_no_messages_in_this_chat_yet">В этом чате еще нет сообщений</string>
+    <string name="login_ok">Вы успешно вошли</string>
 </resources>
