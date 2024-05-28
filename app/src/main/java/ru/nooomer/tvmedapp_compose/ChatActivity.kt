@@ -1,5 +1,7 @@
 package ru.nooomer.tvmedapp_compose
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,9 +24,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -41,7 +44,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,7 +91,6 @@ class ChatActivity : ComponentActivity() {
 @Composable
 fun MessagesScreen(viewModel: MessagesViewModel) {
 	val messages by viewModel.messages.collectAsStateWithLifecycle()
-	val expandedMesssagesIds by viewModel.expandedMessagesIdsList.collectAsStateWithLifecycle()
 	val textValue = remember { mutableStateOf("") }
 	val textChanged = remember { mutableStateOf(false) }
 
@@ -95,6 +101,7 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
 				.padding(bottom = 70.dp)
 		) {
 			if (!messages.isNullOrEmpty()) {
+				AttachmentListButton(LocalContext.current)
 				MessageList(paddingValues, messages)
 				MessageButtons(textValue, textChanged, viewModel)
 			} else {
@@ -102,6 +109,28 @@ fun MessagesScreen(viewModel: MessagesViewModel) {
 					Text(stringResource(R.string.there_are_no_messages_in_this_chat_yet))
 				}
 			}
+		}
+	}
+}
+
+@Composable
+private fun AttachmentListButton(current: Context) {
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.End
+	) {
+		IconButton(modifier = Modifier, onClick = {
+			current.startActivity(
+				Intent(
+					current, AttachmentActivity::class.java
+				)
+			)
+		}) {
+			Icon(
+				imageVector = ImageVector.vectorResource(R.drawable.baseline_attach_file_24),
+				contentDescription = null,
+				tint = Color.Black
+			)
 		}
 	}
 }
@@ -183,12 +212,11 @@ private fun MessageList(
 	) {
 		items(messages!!, MessageDto::id) { message ->
 
-			val arrangement: Arrangement.Horizontal =
-				if (message.from == ssm.fetch(ssm.USER_ID)) {
-					Arrangement.End
-				} else {
-					Arrangement.Start
-				}
+			var arrangement = if (message.from.toString() == ssm.fetch(ssm.USER_ID)) {
+				Arrangement.End
+			} else {
+				Arrangement.Start
+			}
 			MessageBubble(arrangement, message)
 		}
 	}
@@ -219,7 +247,8 @@ private fun MessageBubble(
 				},
 			color = Color.White,
 			text = message.messageText,
-			fontSize = 18.sp
+			fontSize = 18.sp,
+			textAlign = TextAlign.End
 		)
 	}
 }

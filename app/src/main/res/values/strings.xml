@@ -20,4 +20,5 @@
     <string name="choose">Choose %1$s</string>
     <string name="there_are_no_messages_in_this_chat_yet">There are no messages in this chat yet</string>
     <string name="login_ok">You\'re login</string>
+    <string name="title_activity_attachment">AttachmentActivity</string>
 </resources>

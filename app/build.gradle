@@ -12,8 +12,8 @@ android {
         applicationId 'ru.nooomer.tvmedapp_compose'
         minSdk 31
         targetSdk 34
-        versionCode 32
-        versionName "0.32.0"
+        versionCode 33
+        versionName "0.33.0"
         buildConfigField "String", "API_FULL_URL", "\"http://185.117.154.205/api/v1/\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
