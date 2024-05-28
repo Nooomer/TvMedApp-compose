@@ -11,6 +11,5 @@ import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 class TreatmentModelView : ViewModel(), PreferenceDataType, RetrofitFun {
 	val treatmentFlow: Flow<List<TreatmentDto>?> = flow {
 		emit(API.getTreatmentForUser())
-
 	}
 }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -59,6 +60,7 @@ import ru.nooomer.tvmedapp_compose.RetrofitService.SessionManager
 import ru.nooomer.tvmedapp_compose.api.API
 import ru.nooomer.tvmedapp_compose.api.models.AuthDto
 import ru.nooomer.tvmedapp_compose.di.appModule
+import ru.nooomer.tvmedapp_compose.helpers.PasswordVisualTransformation
 import ru.nooomer.tvmedapp_compose.interfaces.PreferenceDataType
 import ru.nooomer.tvmedapp_compose.ui.theme.TvMedApp_composeTheme
 import ru.nooomer.tvmedapp_compose.ui.theme.textFieldColor
@@ -113,48 +115,51 @@ class MainActivity : ComponentActivity(), PreferenceDataType {
 
 	private fun checkTimeOut() =
 		(Date().time - (ssm.fetch(SESSION_TIMEOUT) as String).toLong()) < 604800
+}
 
-	fun loginClick(loginText: String, passwordText: String, context: Context) {
-		if (!ssm.validation() and (loginText != "")) {
-			scope.launch {
-				scope.asyncIO { result = API.login(loginText, passwordText) as AuthDto }.join()
-				when (result) {
-					null -> {
-						val toast = Toast.makeText(
-							context,
-							getString(R.string.an_error_occurred_try_again_later),
-							Toast.LENGTH_SHORT
-						)
-						toast.show()
-						isFailed = true
-					}
+fun loginClick(loginText: String, passwordText: String, context: Context) {
+	if (!ssm.validation() and (loginText != "")) {
+		scope.launch {
+			scope.asyncIO {
+				result = API.login(loginText, passwordText) as AuthDto
+				Log.w("[REQUEST]", "Request data:${result}")
+			}.join()
+			when (result) {
+				null -> {
+					val toast = Toast.makeText(
+						context,
+						R.string.an_error_occurred_try_again_later,
+						Toast.LENGTH_SHORT
+					)
+					toast.show()
+					isFailed = true
+				}
 
-					else -> {
-						with(ssm) {
-							with(result) {
-								save(LOGIN_STATE, true)
-								save(USER_TYPE, this?.userType)
-								save(USER_ID, this?.id)
-								save(SESSION_TIMEOUT, Date().time)
-							}
+				else -> {
+					with(ssm) {
+						with(result) {
+							save(LOGIN_STATE, true)
+							save(USER_TYPE, this?.userType)
+							save(USER_ID, this?.id)
+							save(SESSION_TIMEOUT, Date().time)
 						}
-						val toast = Toast.makeText(
-							context,
-							context.getString(R.string.login_ok),
-							Toast.LENGTH_SHORT
-						)
-						toast.show()
-						with(context) {
-							startActivity(
-								Intent(
-									this,
-									TreatmentActivity::class.java
-								)
+					}
+					val toast = Toast.makeText(
+						context,
+						context.getString(R.string.login_ok),
+						Toast.LENGTH_SHORT
+					)
+					toast.show()
+					with(context) {
+						startActivity(
+							Intent(
+								this,
+								TreatmentActivity::class.java
 							)
-							(this as Activity).finish()
-						}
-						isFailed = false
+						)
+						(this as Activity).finish()
 					}
+					isFailed = false
 				}
 			}
 		}
@@ -311,8 +316,7 @@ fun LoginWindow(context: Context) {
 				.padding(all = 10.dp)
 				.align(Alignment.CenterHorizontally),
 			onClick = {
-				MainActivity()
-					.loginClick(phone.value, password.value, context)
+				loginClick(phone.value, password.value, context)
 				isLoading.value = true
 			}) {
 			if (isLoading.value) {

@@ -33,9 +33,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -157,7 +157,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 				activity?.finish()
 			}) {
 				Icon(
-					imageVector = Icons.Default.ExitToApp,
+					imageVector = Icons.AutoMirrored.Default.ExitToApp,
 					contentDescription = null,
 					tint = Color.Black
 				)
@@ -294,7 +294,7 @@ class TreatmentActivity : ComponentActivity(), PreferenceDataType {
 			)
 			//activity?.finish()
 		}, content = {
-			Icon(Icons.Filled.Message, "message")
+			Icon(Icons.AutoMirrored.Filled.Message, "message")
 		})
 	}
 

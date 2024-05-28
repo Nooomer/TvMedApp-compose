@@ -160,7 +160,9 @@ private fun MessageButtons(
 			}
 		}) {
 			Icon(
-				imageVector = Icons.Default.Send, contentDescription = null, tint = Color.Black
+				imageVector = Icons.AutoMirrored.Default.Send,
+				contentDescription = null,
+				tint = Color.Black
 			)
 		}
 	}

@@ -31,7 +31,7 @@ class TreatmentViewModel : ViewModel() {
 				treatmentFlow.collect {
 					treatmentList = it
 				}
-				_cards.emit(treatmentList!!)
+				_cards.tryEmit(treatmentList!!)
 			}
 		}
 	}
