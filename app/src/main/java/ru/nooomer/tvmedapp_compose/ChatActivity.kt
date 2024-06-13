@@ -210,9 +210,10 @@ private fun MessageList(
 			.fillMaxHeight(),
 		reverseLayout = true// Reverse the layout // Align content to the top
 	) {
-		items(messages!!, MessageDto::id) { message ->
 
-			var arrangement = if (message.from.toString() == ssm.fetch(ssm.USER_ID)) {
+		items(messages!!.reversed(), MessageDto::id) { message ->
+
+			val arrangement = if (message.from.toString() == ssm.fetch(ssm.USER_ID)) {
 				Arrangement.End
 			} else {
 				Arrangement.Start
